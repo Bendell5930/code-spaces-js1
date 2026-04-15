@@ -1,0 +1,277 @@
+/* ════════════════════════════════════════════
+   Subscription – Paywall, Badge, Pricing
+   ════════════════════════════════════════════ */
+
+/* ── Paywall Modal Overlay ── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: fadeIn 0.2s;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  border: 2px solid #fbbf24;
+  border-radius: 16px;
+  padding: 1.5rem 1.25rem;
+  max-width: 380px;
+  width: 100%;
+  animation: slideUp 0.3s;
+  box-shadow: 0 0 40px rgba(251, 191, 36, 0.15);
+}
+
+@keyframes slideUp {
+  from { transform: translateY(30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.modalHeader {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.crownEmoji {
+  font-size: 2.5rem;
+  display: block;
+  animation: bounce 2s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.modalTitle {
+  margin: 0.3rem 0 0;
+  font-size: 1.3rem;
+  font-weight: 900;
+  background: linear-gradient(90deg, #fbbf24, #f59e0b, #fbbf24);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.modalSubtitle {
+  margin: 0.25rem 0 0;
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+.modalSubtitle strong {
+  color: #f1f5f9;
+}
+
+/* ── Feature list ── */
+.featureList {
+  margin-bottom: 1rem;
+}
+
+.featureListTitle {
+  margin: 0 0 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.featureItem {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0;
+}
+
+.featureCheck {
+  color: #4ade80;
+  font-weight: 900;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+}
+
+.featureText {
+  font-size: 0.8rem;
+  color: #e2e8f0;
+}
+
+/* ── Price box ── */
+.priceBox {
+  text-align: center;
+  background: #0f172a;
+  border-radius: 10px;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  border: 1px solid #334155;
+}
+
+.priceAmount {
+  display: block;
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: #fbbf24;
+}
+
+.priceNote {
+  font-size: 0.65rem;
+  color: #64748b;
+}
+
+/* ── Modal actions ── */
+.modalActions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.upgradeBtn {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  border: none;
+  border-radius: 10px;
+  padding: 0.75rem;
+  color: #0f172a;
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.15s, filter 0.15s, box-shadow 0.15s;
+}
+
+.upgradeBtn:hover {
+  transform: scale(1.02);
+  filter: brightness(1.1);
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+}
+
+.laterBtn {
+  background: none;
+  border: none;
+  color: #64748b;
+  font-size: 0.75rem;
+  cursor: pointer;
+  padding: 0.4rem;
+}
+
+.laterBtn:hover {
+  color: #94a3b8;
+}
+
+/* ── Subscription Badge ── */
+.badge {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 0.3rem 0.6rem;
+}
+
+.badgeEmoji {
+  font-size: 0.9rem;
+}
+
+.badgePlan {
+  font-size: 0.7rem;
+  font-weight: 700;
+  flex: 1;
+}
+
+.manageBtn {
+  background: #334155;
+  border: none;
+  border-radius: 6px;
+  color: #94a3b8;
+  font-size: 0.6rem;
+  font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.manageBtn:hover {
+  background: #475569;
+  color: #f1f5f9;
+}
+
+.upgradeBadgeBtn {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  border: none;
+  border-radius: 6px;
+  color: #0f172a;
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 0.2rem 0.5rem;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.upgradeBadgeBtn:hover {
+  transform: scale(1.05);
+}
+
+/* ── Tab lock icon ── */
+.tabLock {
+  position: relative;
+}
+
+.lockIcon {
+  font-size: 0.55rem;
+  margin-left: 0.15rem;
+  opacity: 0.7;
+}
+
+/* ── Locked tab overlay ── */
+.lockedOverlay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 2.5rem 1rem;
+  text-align: center;
+}
+
+.lockedEmoji {
+  font-size: 2.5rem;
+}
+
+.lockedTitle {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin: 0;
+}
+
+.lockedText {
+  font-size: 0.75rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.lockedUpgradeBtn {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  border: none;
+  border-radius: 10px;
+  padding: 0.6rem 1.5rem;
+  color: #0f172a;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.lockedUpgradeBtn:hover {
+  transform: scale(1.03);
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.25);
+}

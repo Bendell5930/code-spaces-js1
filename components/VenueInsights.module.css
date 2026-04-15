@@ -1,0 +1,808 @@
+/* ═══════════════════════════════════════
+   VenueInsights.module.css
+   Dark theme — matches pokie analyzer app
+   ═══════════════════════════════════════ */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 4px 0;
+}
+
+/* ─── Navigation ─── */
+
+.nav {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.navBtn {
+  flex: 1;
+  min-width: 80px;
+  padding: 10px 8px;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  background: #1e293b;
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.navBtn:hover {
+  background: #334155;
+  color: #f8fafc;
+}
+
+.navActive {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: #000;
+  border-color: #f59e0b;
+}
+
+/* ─── Sections ─── */
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sectionTitle {
+  color: #f8fafc;
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #334155;
+}
+
+.subTitle {
+  color: #cbd5e1;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 8px 0 0;
+}
+
+/* ─── Empty State ─── */
+
+.empty {
+  text-align: center;
+  color: #64748b;
+  padding: 32px 16px;
+}
+
+.emptyHint {
+  font-size: 12px;
+  margin-top: 8px;
+  color: #475569;
+}
+
+/* ─── Venue List ─── */
+
+.venueList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.venueCard {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+  color: #f8fafc;
+}
+
+.venueCard:hover {
+  border-color: #f59e0b;
+  background: #1e293bdd;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 12px rgba(245, 158, 11, 0.15);
+}
+
+.venueCardTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.venueName {
+  font-weight: 700;
+  font-size: 14px;
+  color: #f8fafc;
+}
+
+.venueSuburb {
+  font-size: 11px;
+  color: #64748b;
+}
+
+.venueCardStats {
+  display: flex;
+  gap: 12px;
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.timeAgo {
+  color: #f59e0b;
+  font-weight: 600;
+}
+
+/* ─── Summary Grid ─── */
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.summaryCard {
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.summaryLabel {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #64748b;
+}
+
+.summaryValue {
+  font-size: 22px;
+  font-weight: 800;
+  color: #f8fafc;
+}
+
+.summaryScore {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.statusWET .summaryValue { color: #22c55e; }
+.statusNEUTRAL .summaryValue { color: #f59e0b; }
+.statusDRY .summaryValue { color: #ef4444; }
+
+.breakdownRow {
+  display: flex;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  margin-top: 2px;
+}
+
+.wet { color: #22c55e; }
+.neutral { color: #f59e0b; }
+.dry { color: #ef4444; }
+
+/* ─── Legend Toggle ─── */
+
+.legendToggle {
+  padding: 8px 16px;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  background: #1e293b;
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.legendToggle:hover {
+  border-color: #38bdf8;
+}
+
+.legendOn {
+  background: rgba(56, 189, 248, 0.1);
+  border-color: #38bdf8;
+  color: #38bdf8;
+}
+
+/* ─── Machine List ─── */
+
+.machineList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.machineCard {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  cursor: pointer;
+  text-align: left;
+  color: #f8fafc;
+  transition: all 0.2s;
+}
+
+.machineCard:hover {
+  border-color: #f59e0b;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.12);
+}
+
+.machineCardTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.machineCode {
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.machineStatus {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* Score Bar */
+
+.scoreBar {
+  position: relative;
+  height: 20px;
+  background: #0f172a;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.scoreFill {
+  height: 100%;
+  border-radius: 10px;
+  transition: width 0.5s ease;
+}
+
+.scoreLabel {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  font-size: 10px;
+  font-weight: 700;
+  color: #f8fafc;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+}
+
+.machineCardStats {
+  display: flex;
+  gap: 10px;
+  font-size: 11px;
+  color: #94a3b8;
+  flex-wrap: wrap;
+}
+
+.trendUp { color: #22c55e; font-weight: 700; }
+.trendDown { color: #ef4444; font-weight: 700; }
+
+/* ─── Win Pills ─── */
+
+.winPills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.pill {
+  padding: 2px 8px;
+  border: 1px solid;
+  border-radius: 12px;
+  font-size: 10px;
+  color: #e2e8f0;
+  background: rgba(255,255,255,0.03);
+}
+
+/* ─── Recent Sessions ─── */
+
+.recentList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.recentItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  background: #0f172a;
+  border-radius: 8px;
+  font-size: 12px;
+  gap: 8px;
+}
+
+.recentCode {
+  font-weight: 700;
+  color: #f59e0b;
+}
+
+.positive { color: #22c55e; font-weight: 700; }
+.negative { color: #ef4444; font-weight: 700; }
+
+/* ─── Charts ─── */
+
+.chartBox {
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 12px;
+  padding: 14px 10px;
+}
+
+.chartTitle {
+  font-size: 13px;
+  font-weight: 700;
+  color: #e2e8f0;
+  margin: 0 0 10px 4px;
+}
+
+/* ─── Table ─── */
+
+.tableWrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  min-width: 480px;
+}
+
+.table th {
+  text-align: left;
+  color: #64748b;
+  font-weight: 600;
+  padding: 6px 8px;
+  border-bottom: 1px solid #334155;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.table td {
+  padding: 6px 8px;
+  color: #cbd5e1;
+  border-bottom: 1px solid #1e293b;
+}
+
+.table tbody tr:hover {
+  background: rgba(245, 158, 11, 0.05);
+}
+
+.scoreDot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+/* ─── Win Category Grid ─── */
+
+.winCatGrid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+}
+
+@media (max-width: 460px) {
+  .winCatGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.winCatItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 4px;
+  background: #0f172a;
+  border: 1px solid;
+  border-radius: 10px;
+}
+
+.winCatEmoji { font-size: 18px; }
+.winCatCount { font-size: 18px; font-weight: 800; color: #f8fafc; }
+.winCatLabel { font-size: 9px; color: #64748b; text-align: center; }
+
+/* ─── Browse ─── */
+
+.searchInput {
+  width: 100%;
+  padding: 10px 14px;
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  color: #f8fafc;
+  font-size: 14px;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.searchInput:focus {
+  border-color: #f59e0b;
+}
+
+.searchInput::placeholder {
+  color: #475569;
+}
+
+.searchResults {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.regionGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.regionBtn {
+  padding: 6px 12px;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  background: #1e293b;
+  color: #94a3b8;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.regionBtn:hover {
+  border-color: #f59e0b;
+  color: #f8fafc;
+}
+
+.regionActive {
+  background: #f59e0b;
+  color: #000;
+  border-color: #f59e0b;
+  font-weight: 700;
+}
+
+.browseList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.browseVenueCard {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  cursor: pointer;
+  color: #f8fafc;
+  transition: all 0.2s;
+  text-align: left;
+}
+
+.browseVenueCard:hover {
+  border-color: #f59e0b;
+}
+
+/* ─── Activity Feed ─── */
+
+.feedList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.feedItem {
+  padding: 10px 12px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 10px;
+}
+
+.feedHeader {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.feedVenue {
+  font-weight: 700;
+  font-size: 13px;
+  color: #f8fafc;
+}
+
+.feedTime {
+  font-size: 11px;
+  color: #f59e0b;
+}
+
+.feedBody {
+  display: flex;
+  gap: 12px;
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.feedBadges {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.badgeGrand {
+  font-size: 10px;
+  font-weight: 700;
+  color: #f43f5e;
+  background: rgba(244, 63, 94, 0.1);
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.badgeMajor {
+  font-size: 10px;
+  font-weight: 700;
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.1);
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+/* ─── Add Form ─── */
+
+.addForm {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.formInput {
+  width: 100%;
+  padding: 10px 14px;
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  color: #f8fafc;
+  font-size: 14px;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.formInput:focus {
+  border-color: #f59e0b;
+}
+
+.formInput::placeholder {
+  color: #475569;
+}
+
+.submitBtn {
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: #000;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.submitBtn:hover {
+  opacity: 0.9;
+}
+
+/* ─── Back Button ─── */
+
+.backBtn {
+  align-self: flex-start;
+  padding: 6px 12px;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.backBtn:hover {
+  border-color: #f59e0b;
+  color: #f8fafc;
+}
+
+/* ─── Active Venue Banner ─── */
+
+.activeBanner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid #22c55e;
+  border-radius: 10px;
+  color: #22c55e;
+  font-size: 13px;
+}
+
+.clearActive {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 2px 6px;
+}
+
+.clearActive:hover {
+  color: #ef4444;
+}
+
+.activeBtn {
+  padding: 10px 16px;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  background: #1e293b;
+  color: #94a3b8;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.activeBtn:hover {
+  border-color: #22c55e;
+  color: #22c55e;
+}
+
+.activeBtnOn {
+  background: rgba(34, 197, 94, 0.1);
+  border-color: #22c55e;
+  color: #22c55e;
+}
+
+/* ─── Tracked Venue List ─── */
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sectionHeader .sectionTitle {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.trackedCount {
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  background: #0f172a;
+  padding: 3px 10px;
+  border-radius: 12px;
+  border: 1px solid #334155;
+}
+
+.venueCardWrap {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+}
+
+.venueCardWrap .venueCard {
+  flex: 1;
+  min-width: 0;
+}
+
+.noData {
+  color: #475569;
+  font-style: italic;
+  font-size: 11px;
+}
+
+.untrackBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  min-width: 36px;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid #3b1218;
+  border-radius: 10px;
+  color: #ef4444;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.untrackBtn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: #ef4444;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.25);
+}
+
+/* ─── Browse Track Buttons ─── */
+
+.browseCardWrap {
+  display: flex;
+  gap: 6px;
+  align-items: stretch;
+}
+
+.browseCardWrap .browseVenueCard {
+  flex: 1;
+  min-width: 0;
+}
+
+.trackBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  min-width: 40px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  color: #64748b;
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.trackBtn:hover {
+  border-color: #f59e0b;
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.08);
+}
+
+.trackBtnActive {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  min-width: 40px;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid #f59e0b;
+  border-radius: 10px;
+  color: #f59e0b;
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.trackBtnActive:hover {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: #ef4444;
+  color: #ef4444;
+}

@@ -1,0 +1,682 @@
+/* ════════════════════════════════════════════
+   Community Hub – shared styles
+   ════════════════════════════════════════════ */
+
+/* ── Hub wrapper ── */
+.hubWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* ── Sub-tabs ── */
+.subTabs {
+  display: flex;
+  gap: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #334155;
+  background: #0f172a;
+}
+
+.subTab {
+  flex: 1;
+  padding: 0.55rem 0.5rem;
+  background: transparent;
+  border: none;
+  color: #64748b;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.subTab:hover {
+  color: #cbd5e1;
+  background: #162032;
+}
+
+.subTabActive {
+  background: #1e293b;
+  color: #fbbf24;
+  box-shadow: inset 0 -2px 0 #fbbf24;
+}
+
+/* ══════════════════════════════════
+   CHAT FORUM
+   ══════════════════════════════════ */
+
+.chatWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Profile bar */
+.profileBar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #1e293b;
+  border-radius: 10px;
+  padding: 0.5rem 0.75rem;
+}
+
+.profileAvatar {
+  font-size: 1.5rem;
+}
+
+.profileName {
+  background: none;
+  border: none;
+  color: #f1f5f9;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0.2rem 0.4rem;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+
+.profileName:hover {
+  background: #334155;
+}
+
+.nameEdit {
+  display: flex;
+  gap: 0.3rem;
+  align-items: center;
+}
+
+.nameInput {
+  background: #0f172a;
+  border: 1px solid #475569;
+  border-radius: 6px;
+  color: #f1f5f9;
+  font-size: 0.8rem;
+  padding: 0.3rem 0.5rem;
+  width: 140px;
+}
+
+.nameInput:focus {
+  outline: none;
+  border-color: #fbbf24;
+}
+
+.nameBtn {
+  background: #334155;
+  border: none;
+  color: #f1f5f9;
+  font-size: 0.85rem;
+  border-radius: 6px;
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+}
+
+.nameBtn:hover {
+  background: #475569;
+}
+
+/* Message list */
+.messageList {
+  background: #0f172a;
+  border: 1px solid #1e293b;
+  border-radius: 10px;
+  padding: 0.5rem;
+  max-height: 400px;
+  min-height: 180px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.messageList::-webkit-scrollbar {
+  width: 4px;
+}
+
+.messageList::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 4px;
+}
+
+.emptyChat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 2.5rem 1rem;
+  color: #475569;
+  text-align: center;
+}
+
+.emptyChatEmoji {
+  font-size: 2.5rem;
+}
+
+.emptyChat p {
+  margin: 0;
+  font-size: 0.8rem;
+}
+
+/* Message bubble */
+.msgRow {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.msgRowMe {
+  justify-content: flex-end;
+}
+
+.msgBubble {
+  background: #1e293b;
+  border-radius: 12px;
+  padding: 0.5rem 0.7rem;
+  max-width: 85%;
+  min-width: 120px;
+}
+
+.msgHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-bottom: 0.15rem;
+}
+
+.msgAvatar {
+  font-size: 0.9rem;
+}
+
+.msgName {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #fbbf24;
+}
+
+.msgTime {
+  font-size: 0.55rem;
+  color: #475569;
+  margin-left: auto;
+}
+
+.msgText {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #e2e8f0;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+/* Reactions */
+.reactions {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  margin-top: 0.25rem;
+  flex-wrap: wrap;
+}
+
+.reactionBadge {
+  background: #334155;
+  border: none;
+  border-radius: 20px;
+  padding: 0.1rem 0.4rem;
+  font-size: 0.65rem;
+  color: #f1f5f9;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.reactionBadge:hover {
+  background: #475569;
+}
+
+.reactionPicker {
+  display: flex;
+  gap: 0;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.msgBubble:hover .reactionPicker {
+  opacity: 1;
+}
+
+.reactionBtn {
+  background: none;
+  border: none;
+  font-size: 0.7rem;
+  cursor: pointer;
+  padding: 0.1rem;
+  opacity: 0.5;
+  transition: opacity 0.15s, transform 0.15s;
+}
+
+.reactionBtn:hover {
+  opacity: 1;
+  transform: scale(1.3);
+}
+
+/* Chat input */
+.chatInput {
+  display: flex;
+  gap: 0.4rem;
+  align-items: flex-end;
+}
+
+.chatTextarea {
+  flex: 1;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  color: #f1f5f9;
+  font-size: 0.8rem;
+  padding: 0.55rem 0.7rem;
+  resize: none;
+  font-family: inherit;
+  line-height: 1.4;
+}
+
+.chatTextarea:focus {
+  outline: none;
+  border-color: #fbbf24;
+}
+
+.chatTextarea::placeholder {
+  color: #475569;
+}
+
+.sendBtn {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  border: none;
+  border-radius: 10px;
+  padding: 0.55rem 0.75rem;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: transform 0.15s, filter 0.15s;
+}
+
+.sendBtn:hover:not(:disabled) {
+  transform: scale(1.05);
+  filter: brightness(1.1);
+}
+
+.sendBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ══════════════════════════════════
+   RECENT WINS FEED
+   ══════════════════════════════════ */
+
+.feedWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.feedHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 0.2rem;
+}
+
+.feedLive {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #ef4444;
+  animation: livePulse 1.5s ease-in-out infinite;
+}
+
+@keyframes livePulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.feedTitle {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.feedEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem 1rem;
+  color: #475569;
+  text-align: center;
+  gap: 0.25rem;
+}
+
+.feedEmptyEmoji {
+  font-size: 2.5rem;
+}
+
+.feedEmpty p {
+  margin: 0;
+  font-size: 0.8rem;
+}
+
+.feedList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+/* Win card */
+.winCard {
+  background: #1e293b;
+  border-radius: 12px;
+  padding: 0.65rem 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  border: 1px solid #334155;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  position: relative;
+}
+
+.winCard:hover {
+  border-color: #fbbf24;
+  box-shadow: 0 0 12px rgba(251, 191, 36, 0.1);
+}
+
+.winCardLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.winAvatar {
+  font-size: 1.3rem;
+}
+
+.winInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.winUser {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.winMachine {
+  font-size: 0.6rem;
+  color: #64748b;
+}
+
+.winLocation {
+  font-size: 0.55rem;
+  color: #38bdf8;
+  font-weight: 500;
+}
+
+.winCardRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.05rem;
+  margin-left: auto;
+}
+
+.winTier {
+  font-size: 0.55rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-radius: 4px;
+  padding: 0.1rem 0.3rem;
+}
+
+.tierJackpot {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  color: #0f172a;
+  animation: jackpotGlow 1s ease-in-out infinite alternate;
+}
+
+@keyframes jackpotGlow {
+  from { box-shadow: 0 0 4px rgba(251, 191, 36, 0.4); }
+  to { box-shadow: 0 0 16px rgba(251, 191, 36, 0.8); }
+}
+
+.tierBig {
+  background: #38bdf8;
+  color: #0f172a;
+}
+
+.tierNice {
+  background: #f97316;
+  color: #0f172a;
+}
+
+.tierWin {
+  background: #334155;
+  color: #4ade80;
+}
+
+.tierSmall {
+  background: #1e293b;
+  color: #64748b;
+  border: 1px solid #334155;
+}
+
+.winAmount {
+  font-size: 1rem;
+  font-weight: 900;
+  color: #4ade80;
+}
+
+.winMulti {
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: #fbbf24;
+}
+
+.winTime {
+  font-size: 0.55rem;
+  color: #475569;
+}
+
+.cheerBtn {
+  position: absolute;
+  right: 0.4rem;
+  bottom: 0.35rem;
+  background: none;
+  border: none;
+  padding: 0.15rem 0.3rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  border-radius: 12px;
+  transition: background 0.15s, transform 0.15s;
+}
+
+.cheerBtn:hover {
+  background: #334155;
+  transform: scale(1.15);
+}
+
+/* ══════════════════════════════════
+   LEADERBOARD
+   ══════════════════════════════════ */
+
+.lbWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+/* Sort bar */
+.lbSortBar {
+  display: flex;
+  gap: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #334155;
+}
+
+.lbSortBtn {
+  flex: 1;
+  background: #0f172a;
+  border: none;
+  color: #64748b;
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 0.45rem 0.2rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.lbSortBtn:hover {
+  color: #cbd5e1;
+  background: #162032;
+}
+
+.lbSortActive {
+  background: #1e293b;
+  color: #fbbf24;
+}
+
+/* Player list */
+.lbList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.lbCard {
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 12px;
+  padding: 0.7rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.lbCard:hover {
+  border-color: #475569;
+}
+
+.lbCardMe {
+  border-color: #f59e0b;
+  box-shadow: 0 0 14px rgba(245, 158, 11, 0.12);
+}
+
+.lbPosition {
+  font-size: 1.2rem;
+  font-weight: 900;
+  color: #fbbf24;
+  text-align: center;
+}
+
+.lbPlayer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.lbAvatar {
+  font-size: 1.5rem;
+}
+
+.lbPlayerInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.lbName {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.lbYou {
+  font-size: 0.65rem;
+  color: #38bdf8;
+  font-weight: 600;
+}
+
+.lbRank {
+  font-size: 0.65rem;
+  font-weight: 700;
+}
+
+.lbLocation {
+  font-size: 0.58rem;
+  color: #38bdf8;
+  font-weight: 500;
+}
+
+/* Stats grid */
+.lbStats {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.3rem;
+}
+
+.lbStatItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #0f172a;
+  border-radius: 6px;
+  padding: 0.35rem 0.2rem;
+}
+
+.lbStatValue {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #f1f5f9;
+}
+
+.lbStatLabel {
+  font-size: 0.5rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #475569;
+  letter-spacing: 0.04em;
+}
+
+/* Badges */
+.lbBadges {
+  display: flex;
+  gap: 0.2rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.lbBadge {
+  font-size: 1rem;
+  cursor: default;
+  transition: transform 0.15s;
+}
+
+.lbBadge:hover {
+  transform: scale(1.3);
+}
+
+/* Streak */
+.lbStreak {
+  text-align: center;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #f97316;
+  background: rgba(249, 115, 22, 0.1);
+  border-radius: 6px;
+  padding: 0.2rem 0.5rem;
+}

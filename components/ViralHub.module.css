@@ -1,0 +1,86 @@
+/* ════════════════════════════════════════════
+   ViralHub – container styles
+   ════════════════════════════════════════════ */
+
+.hubWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* ── Group tabs (top-level categories) ── */
+.groupTabs {
+  display: flex;
+  gap: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #334155;
+  background: #0f172a;
+}
+
+.groupTab {
+  flex: 1;
+  padding: 0.55rem 0.25rem;
+  background: transparent;
+  border: none;
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.groupTab:hover {
+  color: #cbd5e1;
+  background: #162032;
+}
+
+.groupTabActive {
+  background: #1e293b;
+  color: #fbbf24;
+  box-shadow: inset 0 -2px 0 #fbbf24;
+}
+
+/* ── Feature sub-tabs (items within group) ── */
+.featureTabs {
+  display: flex;
+  gap: 0.35rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 0 0.15rem;
+}
+
+.featureTabs::-webkit-scrollbar {
+  display: none;
+}
+
+.featureTab {
+  flex-shrink: 0;
+  padding: 0.35rem 0.65rem;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 99px;
+  color: #94a3b8;
+  font-size: 0.7rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.featureTab:hover {
+  background: #283548;
+  color: #e2e8f0;
+}
+
+.featureTabActive {
+  background: #f59e0b20;
+  border-color: #f59e0b60;
+  color: #fbbf24;
+}
+
+/* ── Content area ── */
+.content {
+  min-height: 200px;
+}

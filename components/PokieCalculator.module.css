@@ -1,0 +1,1264 @@
+/* ─── PokieCalculator — Australian Pub/Club Pokie Machine Layout ─── */
+
+.calculator {
+  background: linear-gradient(180deg, #1a0808 0%, #2a0e12 50%, #1a0808 100%);
+  border: 2px solid #4a1520;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow:
+    0 0 30px rgba(245, 158, 11, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+/* ─── Machine Header ─── */
+
+.machineHeader {
+  background: linear-gradient(135deg, #3d1225 0%, #2d0a0a 100%);
+  border-bottom: 2px solid #f59e0b;
+  padding: 0.6rem 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.machineName {
+  color: #f59e0b;
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  text-shadow: 0 0 12px rgba(245, 158, 11, 0.4);
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.liveBadge {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid #ef4444;
+  border-radius: 20px;
+  padding: 0.15rem 0.55rem;
+  font-size: 0.55rem;
+  font-weight: 700;
+  color: #ef4444;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.liveDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #ef4444;
+  animation: livePulse 1.2s ease-in-out infinite;
+}
+
+.denomBadge {
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 12px;
+  padding: 0.15rem 0.5rem;
+  font-size: 0.55rem;
+  font-weight: 700;
+  color: #f59e0b;
+  letter-spacing: 0.06em;
+}
+
+@keyframes livePulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 4px #ef4444; }
+  50% { opacity: 0.3; box-shadow: 0 0 8px #ef4444; }
+}
+
+/* ─── Main Display Panel (CREDIT / WIN / BET meters — Australian LED style) ─── */
+
+.displayPanel {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr 1fr;
+  gap: 1px;
+  background: #0a0404;
+  margin: 0.65rem;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #4a1520;
+}
+
+.meter {
+  background: linear-gradient(180deg, #0f0606 0%, #1a0a0a 100%);
+  padding: 0.65rem 0.4rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.meterWin {
+  background: linear-gradient(180deg, #1a0a00 0%, #0f0606 100%);
+}
+
+.meterLabel {
+  font-size: 0.5rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: #64748b;
+}
+
+.meterValue {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #e2e8f0;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 8px rgba(226, 232, 240, 0.15);
+}
+
+.meterSub {
+  font-size: 0.55rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.meterValueBig {
+  font-size: 1.45rem;
+  font-weight: 900;
+  color: #f59e0b;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
+  transition: all 0.3s;
+}
+
+.winFlash .meterValueBig {
+  color: #fbbf24;
+  text-shadow: 0 0 30px rgba(251, 191, 36, 0.8);
+  animation: winGlow 1.5s ease;
+}
+
+@keyframes winGlow {
+  0% { transform: scale(1); }
+  15% { transform: scale(1.18); color: #fff; }
+  40% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
+/* ─── ★ BONUS FEATURE PANEL ★ ─── */
+
+.featurePanel {
+  margin: 0 0.65rem 0.5rem;
+  background: linear-gradient(135deg, #1a0a00 0%, #2d1400 50%, #1a0800 100%);
+  border: 2px solid #f59e0b;
+  border-radius: 12px;
+  overflow: hidden;
+  animation: featureGlow 2s ease-in-out infinite;
+}
+
+.featureComplete {
+  border-color: #22c55e;
+  animation: featureWin 0.6s ease infinite;
+}
+
+@keyframes featureGlow {
+  0%, 100% { box-shadow: 0 0 12px rgba(245, 158, 11, 0.2); }
+  50% { box-shadow: 0 0 25px rgba(245, 158, 11, 0.45); }
+}
+
+@keyframes featureWin {
+  0%, 100% { box-shadow: 0 0 15px rgba(34, 197, 94, 0.3); }
+  50% { box-shadow: 0 0 35px rgba(34, 197, 94, 0.6); }
+}
+
+.featureHeader {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0.05) 100%);
+  padding: 0.5rem 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-bottom: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.featureIcon {
+  font-size: 1rem;
+}
+
+.featureTitle {
+  color: #f59e0b;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
+}
+
+.featureMulti {
+  margin-left: auto;
+  background: rgba(245, 158, 11, 0.2);
+  border: 1px solid #f59e0b;
+  border-radius: 8px;
+  padding: 0.1rem 0.4rem;
+  font-size: 0.62rem;
+  font-weight: 800;
+  color: #f59e0b;
+}
+
+.featureBody {
+  padding: 0.6rem 0.75rem;
+}
+
+.featureMeters {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.featureMeter {
+  flex: 1;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(245, 158, 11, 0.15);
+  border-radius: 8px;
+  padding: 0.35rem 0.25rem;
+}
+
+.featureMeterLabel {
+  display: block;
+  font-size: 0.45rem;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.1rem;
+}
+
+.featureMeterValue {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #e2e8f0;
+  font-variant-numeric: tabular-nums;
+}
+
+.featureMeterValueGold {
+  font-size: 1rem;
+  font-weight: 900;
+  color: #f59e0b;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 10px rgba(245, 158, 11, 0.35);
+}
+
+.featureMeterSub {
+  display: block;
+  font-size: 0.5rem;
+  color: #64748b;
+  font-weight: 600;
+  margin-top: 0.05rem;
+}
+
+.featureProgress {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 2px;
+  margin-bottom: 0.5rem;
+  overflow: hidden;
+}
+
+.featureProgressBar {
+  height: 100%;
+  background: linear-gradient(90deg, #f59e0b, #fbbf24);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+.featureBtns {
+  display: grid;
+  grid-template-columns: 1fr 1fr 0.8fr;
+  gap: 0.4rem;
+}
+
+.featureSpinBtn,
+.featureWinBtn,
+.featureEndBtn {
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 0.3rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+
+.featureSpinBtn {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: #0f172a;
+}
+
+.featureSpinBtn:hover {
+  box-shadow: 0 2px 12px rgba(245, 158, 11, 0.4);
+}
+
+.featureWinBtn {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  color: #fff;
+}
+
+.featureWinBtn:hover {
+  box-shadow: 0 2px 12px rgba(34, 197, 94, 0.4);
+}
+
+.featureEndBtn {
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  color: #fff;
+}
+
+.featureEndBtn:hover {
+  box-shadow: 0 2px 12px rgba(99, 102, 241, 0.4);
+}
+
+/* Feature Complete result display */
+
+.featureResult {
+  padding: 1rem 0.75rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  animation: featureResultPulse 0.8s ease;
+}
+
+@keyframes featureResultPulse {
+  0% { transform: scale(0.95); opacity: 0; }
+  50% { transform: scale(1.03); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.featureResultLabel {
+  font-size: 0.55rem;
+  font-weight: 700;
+  color: #22c55e;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+}
+
+.featureResultValue {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: #22c55e;
+  text-shadow: 0 0 20px rgba(34, 197, 94, 0.5);
+}
+
+.featureResultDollar {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #4ade80;
+}
+
+.featureResultNote {
+  font-size: 0.52rem;
+  color: #64748b;
+  margin-top: 0.15rem;
+}
+
+/* ─── Gamble Panel (Australian double-up: Red/Black) ─── */
+
+.gamblePanel {
+  margin: 0 0.65rem 0.5rem;
+  background: linear-gradient(135deg, #0f0020 0%, #1a0030 100%);
+  border: 2px solid #a855f7;
+  border-radius: 12px;
+  overflow: hidden;
+  animation: gambleGlow 1.5s ease-in-out infinite;
+}
+
+@keyframes gambleGlow {
+  0%, 100% { box-shadow: 0 0 10px rgba(168, 85, 247, 0.2); }
+  50% { box-shadow: 0 0 22px rgba(168, 85, 247, 0.45); }
+}
+
+.gambleHeader {
+  background: rgba(168, 85, 247, 0.1);
+  padding: 0.45rem 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(168, 85, 247, 0.2);
+}
+
+.gambleTitle {
+  color: #a855f7;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+
+.gambleAmount {
+  font-size: 0.6rem;
+  color: #c084fc;
+  font-weight: 700;
+}
+
+.gambleBody {
+  padding: 0.6rem 0.75rem;
+  text-align: center;
+}
+
+.gambleText {
+  font-size: 0.6rem;
+  color: #94a3b8;
+  margin: 0 0 0.5rem;
+}
+
+.gambleLimit {
+  font-size: 0.55rem;
+  color: #f59e0b;
+  font-weight: 700;
+  margin: 0 0 0.4rem;
+}
+
+.gambleBtns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.gambleRed,
+.gambleBlack {
+  border: none;
+  border-radius: 10px;
+  padding: 0.65rem;
+  font-size: 0.85rem;
+  font-weight: 800;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+  letter-spacing: 0.06em;
+}
+
+.gambleRed {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(239, 68, 68, 0.3);
+}
+
+.gambleRed:hover {
+  box-shadow: 0 4px 18px rgba(239, 68, 68, 0.5);
+  transform: translateY(-1px);
+}
+
+.gambleBlack {
+  background: linear-gradient(135deg, #334155, #1e293b);
+  color: #e2e8f0;
+  border: 1px solid #475569;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.gambleBlack:hover {
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5);
+  transform: translateY(-1px);
+  border-color: #64748b;
+}
+
+.gambleHistory {
+  display: flex;
+  gap: 0.3rem;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+  min-height: 1.2rem;
+}
+
+.gambleWin {
+  color: #22c55e;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.gambleLoss {
+  color: #ef4444;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.takeWinBtn {
+  width: 100%;
+  border: none;
+  border-radius: 8px;
+  padding: 0.55rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(34, 197, 94, 0.3);
+  transition: all 0.15s;
+}
+
+.takeWinBtn:hover {
+  box-shadow: 0 4px 16px rgba(34, 197, 94, 0.5);
+}
+
+/* ─── Config Row (Denom / Bet Per Line / Lines / Total Bet) ─── */
+
+.configRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1.1fr;
+  gap: 0.35rem;
+  padding: 0 0.65rem;
+  margin-bottom: 0.6rem;
+}
+
+.configItem {
+  text-align: center;
+}
+
+.configLabel {
+  display: block;
+  font-size: 0.45rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.2rem;
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.1rem;
+  background: #0f0606;
+  border: 1px solid #4a1520;
+  border-radius: 7px;
+  padding: 0.15rem;
+}
+
+.stepBtn {
+  background: transparent;
+  border: none;
+  color: #f59e0b;
+  font-size: 0.65rem;
+  cursor: pointer;
+  padding: 0.15rem 0.3rem;
+  border-radius: 4px;
+  transition: background 0.15s;
+  font-family: inherit;
+}
+
+.stepBtn:hover {
+  background: rgba(245, 158, 11, 0.15);
+}
+
+.stepBtn:active {
+  background: rgba(245, 158, 11, 0.25);
+}
+
+.stepValue {
+  color: #e2e8f0;
+  font-size: 0.68rem;
+  font-weight: 700;
+  min-width: 2.5rem;
+  text-align: center;
+}
+
+.totalBet {
+  background: #0f0606;
+  border: 1px solid #4a1520;
+  border-radius: 7px;
+  padding: 0.2rem 0.3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.totalBetValue {
+  color: #e2e8f0;
+  font-size: 0.72rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.totalBetDollar {
+  font-size: 0.5rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.linesValue {
+  display: block;
+  color: #e2e8f0;
+  font-size: 0.72rem;
+  font-weight: 800;
+  background: #0f0606;
+  border: 1px solid #4a1520;
+  border-radius: 7px;
+  padding: 0.25rem 0.3rem;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─── Bet x Panel (5 individual buttons) ─── */
+
+.betPanel {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.35rem;
+  padding: 0 0.65rem;
+  margin-bottom: 0.4rem;
+}
+
+.betBtn {
+  background: linear-gradient(180deg, #2a1a0a 0%, #1a0f05 100%);
+  border: 1.5px solid #4a3520;
+  border-radius: 9px;
+  padding: 0.45rem 0.15rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.12rem;
+}
+
+.betBtn:hover {
+  border-color: #f59e0b;
+  background: linear-gradient(180deg, #3d2510 0%, #2a1a0a 100%);
+}
+
+.betBtn:active {
+  transform: scale(0.95);
+}
+
+.betBtnActive {
+  border-color: #f59e0b;
+  background: linear-gradient(180deg, #78350f 0%, #451a03 100%);
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.25);
+}
+
+.betBtnCount {
+  font-size: 0.9rem;
+  font-weight: 900;
+  color: #f59e0b;
+  line-height: 1;
+}
+
+.betBtnActive .betBtnCount {
+  color: #fff;
+  text-shadow: 0 0 8px rgba(245, 158, 11, 0.5);
+}
+
+.betBtnLabel {
+  font-size: 0.38rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  line-height: 1.1;
+  text-align: center;
+}
+
+.betBtnActive .betBtnLabel {
+  color: #fcd34d;
+}
+
+/* ─── Play Lines Panel (5 individual buttons) ─── */
+
+.linesPanel {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.35rem;
+  padding: 0 0.65rem;
+  margin-bottom: 0.5rem;
+}
+
+.lineBtn {
+  background: linear-gradient(180deg, #1a1a2e 0%, #0f0f1f 100%);
+  border: 1.5px solid #334155;
+  border-radius: 9px;
+  padding: 0.45rem 0.15rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.12rem;
+}
+
+.lineBtn:hover {
+  border-color: #38bdf8;
+  background: linear-gradient(180deg, #1e293b 0%, #172032 100%);
+}
+
+.lineBtn:active {
+  transform: scale(0.95);
+}
+
+.lineBtnActive {
+  border-color: #38bdf8;
+  background: linear-gradient(180deg, #0c4a6e 0%, #082f49 100%);
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.25);
+}
+
+.lineBtnCount {
+  font-size: 0.9rem;
+  font-weight: 900;
+  color: #38bdf8;
+  line-height: 1;
+}
+
+.lineBtnActive .lineBtnCount {
+  color: #fff;
+  text-shadow: 0 0 8px rgba(56, 189, 248, 0.5);
+}
+
+.lineBtnLabel {
+  font-size: 0.38rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  line-height: 1.1;
+  text-align: center;
+}
+
+.lineBtnActive .lineBtnLabel {
+  color: #93c5fd;
+}
+
+/* ─── Machine Button Panel (mirrors real Australian pokie buttons) ─── */
+
+.buttonPanel {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.5fr;
+  gap: 0.35rem;
+  padding: 0 0.65rem;
+  margin-bottom: 0.5rem;
+}
+
+.machineBtn {
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 0.5rem 0.2rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.machineBtn:hover {
+  border-color: #64748b;
+  background: linear-gradient(180deg, #334155 0%, #1e293b 100%);
+}
+
+.machineBtn:active {
+  transform: scale(0.96);
+}
+
+.machineBtnIcon {
+  font-size: 0.85rem;
+  color: #e2e8f0;
+  font-weight: 800;
+}
+
+.machineBtnLabel {
+  font-size: 0.45rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.gambleBtn {
+  border-color: #4c1d95;
+}
+
+.gambleBtnActive {
+  border-color: #a855f7;
+  background: linear-gradient(180deg, #2e1065 0%, #1e0a4a 100%);
+  animation: gambleBtnPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes gambleBtnPulse {
+  0%, 100% { box-shadow: 0 0 6px rgba(168, 85, 247, 0.2); }
+  50% { box-shadow: 0 0 14px rgba(168, 85, 247, 0.5); }
+}
+
+.machineBtn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* PLAY / SPIN button — the big red button */
+
+.playBtn {
+  background: linear-gradient(180deg, #475569 0%, #334155 100%);
+  border: 2px solid #475569;
+  border-radius: 10px;
+  padding: 0.5rem 0.3rem;
+  cursor: not-allowed;
+  font-family: inherit;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  transition: all 0.2s;
+  opacity: 0.5;
+}
+
+.playReady {
+  background: linear-gradient(180deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%);
+  border-color: #ef4444;
+  cursor: pointer;
+  opacity: 1;
+  box-shadow: 0 2px 15px rgba(239, 68, 68, 0.3);
+  animation: playPulse 2s ease-in-out infinite;
+}
+
+.playReady:hover {
+  box-shadow: 0 4px 25px rgba(239, 68, 68, 0.5);
+  transform: translateY(-1px);
+}
+
+.playReady:active {
+  transform: translateY(1px) scale(0.97);
+  box-shadow: 0 1px 8px rgba(239, 68, 68, 0.3);
+}
+
+.playFeature {
+  background: linear-gradient(180deg, #f59e0b 0%, #d97706 50%, #b45309 100%);
+  border-color: #f59e0b;
+  cursor: pointer;
+  opacity: 1;
+  box-shadow: 0 2px 15px rgba(245, 158, 11, 0.3);
+  animation: featureBtnPulse 1.5s ease-in-out infinite;
+}
+
+.playFeature:hover {
+  box-shadow: 0 4px 25px rgba(245, 158, 11, 0.5);
+}
+
+@keyframes playPulse {
+  0%, 100% { box-shadow: 0 2px 15px rgba(239, 68, 68, 0.3); }
+  50% { box-shadow: 0 2px 25px rgba(239, 68, 68, 0.55); }
+}
+
+@keyframes featureBtnPulse {
+  0%, 100% { box-shadow: 0 2px 15px rgba(245, 158, 11, 0.3); }
+  50% { box-shadow: 0 2px 25px rgba(245, 158, 11, 0.55); }
+}
+
+.playBtn:disabled {
+  animation: none;
+}
+
+.playBtnIcon {
+  font-size: 1rem;
+  color: #fff;
+}
+
+.playBtnLabel {
+  font-size: 0.52rem;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.9);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* ─── Collect Row (Take Win / Bonus / Collect) ─── */
+
+.collectRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.3fr;
+  gap: 0.4rem;
+  padding: 0 0.65rem;
+  margin-bottom: 0.65rem;
+}
+
+.winEntryBtn,
+.featureStartBtn,
+.collectBtn {
+  border: none;
+  border-radius: 9px;
+  padding: 0.55rem 0.3rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.winEntryBtn {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: #0f172a;
+  box-shadow: 0 2px 10px rgba(245, 158, 11, 0.2);
+}
+
+.winEntryBtn:hover {
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.4);
+  transform: translateY(-1px);
+}
+
+.featureStartBtn {
+  background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(168, 85, 247, 0.2);
+}
+
+.featureStartBtn:hover {
+  box-shadow: 0 4px 16px rgba(168, 85, 247, 0.4);
+  transform: translateY(-1px);
+}
+
+.featureStartBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.collectBtn {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(34, 197, 94, 0.2);
+}
+
+.collectBtn:hover {
+  box-shadow: 0 4px 16px rgba(34, 197, 94, 0.4);
+  transform: translateY(-1px);
+}
+
+.collectBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* ─── Note In Modal ─── */
+
+.noteOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 8000;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.noteCard {
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 14px;
+  max-width: 340px;
+  width: 100%;
+  padding: 1.15rem;
+  animation: slideUp 0.2s ease;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.noteTitle {
+  color: #22c55e;
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin: 0 0 0.25rem;
+  text-align: center;
+}
+
+.noteHint {
+  color: #64748b;
+  font-size: 0.6rem;
+  text-align: center;
+  margin: 0 0 0.65rem;
+}
+
+.noteGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.45rem;
+  margin-bottom: 0.65rem;
+}
+
+.noteBtn {
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  color: #e2e8f0;
+  padding: 0.55rem 0.3rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.noteBtn:hover {
+  border-color: #22c55e;
+  background: rgba(34, 197, 94, 0.06);
+}
+
+.noteBtnValue {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #e2e8f0;
+}
+
+.noteBtnCredits {
+  font-size: 0.5rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.noteCustom {
+  display: flex;
+  align-items: center;
+  background: #0f172a;
+  border: 2px solid #334155;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 0.65rem;
+  transition: border-color 0.2s;
+}
+
+.noteCustom:focus-within {
+  border-color: #22c55e;
+}
+
+.noteDollar {
+  color: #64748b;
+  font-size: 1rem;
+  font-weight: 700;
+  padding-left: 0.65rem;
+}
+
+.noteField {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #f1f5f9;
+  font-size: 1.1rem;
+  font-weight: 700;
+  padding: 0.55rem;
+  font-family: inherit;
+}
+
+.noteField::placeholder {
+  color: #475569;
+}
+
+.noteField::-webkit-outer-spin-button,
+.noteField::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.noteField[type='number'] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.noteInsertBtn {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  border: none;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.55rem 0.75rem;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.noteInsertBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.noteCancelBtn {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+
+.noteCancelBtn:hover {
+  background: #334155;
+}
+
+/* ─── Session Stats Panel ─── */
+
+.sessionPanel {
+  background: linear-gradient(180deg, #0f0606 0%, #150a0a 100%);
+  border-top: 1px solid #4a1520;
+  padding: 0.65rem;
+}
+
+.sessionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.45rem;
+}
+
+.sessionTitle {
+  font-size: 0.55rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.resetBtn {
+  background: transparent;
+  border: 1px solid #334155;
+  color: #64748b;
+  font-size: 0.55rem;
+  font-weight: 600;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+
+.resetBtn:hover {
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+.sessionGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.35rem;
+}
+
+.sessionStat {
+  text-align: center;
+  background: #1a0a0a;
+  border: 1px solid #2d0a0a;
+  border-radius: 7px;
+  padding: 0.3rem;
+}
+
+.sessionLabel {
+  display: block;
+  font-size: 0.45rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.1rem;
+}
+
+.sessionValue {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #e2e8f0;
+  font-variant-numeric: tabular-nums;
+}
+
+.green { color: #4ade80 !important; }
+.red { color: #ef4444 !important; }
+.amber { color: #f59e0b !important; }
+.gold { color: #fbbf24 !important; }
+
+/* ─── Responsive ─── */
+
+@media (max-width: 380px) {
+  .displayPanel {
+    grid-template-columns: 1fr 1.2fr 1fr;
+    margin: 0.5rem;
+  }
+
+  .configRow {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.3rem;
+    padding: 0 0.5rem;
+  }
+
+  .buttonPanel {
+    grid-template-columns: 1fr 1fr 1.3fr;
+    gap: 0.3rem;
+    padding: 0 0.5rem;
+  }
+
+  .buttonPanel .playBtn {
+    grid-column: span 3;
+  }
+
+  .betPanel {
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.25rem;
+    padding: 0 0.5rem;
+  }
+
+  .betBtnLabel {
+    font-size: 0.32rem;
+  }
+
+  .linesPanel {
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.25rem;
+    padding: 0 0.5rem;
+  }
+
+  .lineBtnLabel {
+    font-size: 0.32rem;
+  }
+
+  .collectRow {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.3rem;
+    padding: 0 0.5rem;
+  }
+
+  .meterValue {
+    font-size: 1rem;
+  }
+
+  .meterValueBig {
+    font-size: 1.2rem;
+  }
+
+  .sessionGrid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.25rem;
+  }
+
+  .featureMeters {
+    flex-direction: column;
+  }
+
+  .gambleBtns {
+    gap: 0.35rem;
+  }
+}
