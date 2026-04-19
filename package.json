@@ -3,7 +3,8 @@
   "scripts": {
     "dev": "next",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
   },
   "dependencies": {
     "@stripe/stripe-js": "^9.0.1",
@@ -13,5 +14,17 @@
     "react-dom": "^18.2.0",
     "recharts": "^3.8.1",
     "stripe": "^21.0.1"
-  }
+  },
+  "devDependencies": {
+    "@jest/globals": "^30.3.0",
+    "jest": "^30.3.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "moduleNameMapper": {
+      "^(.{1,2}/.*).js$": "$1"
+    },
+    "transform": {}
+  },
+  "type": "module"
 }

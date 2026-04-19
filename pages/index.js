@@ -13,7 +13,7 @@ import VenueInsights from '../components/VenueInsights'
 import ViralHub from '../components/ViralHub'
 import { recordSessionSpin } from '../lib/sessionManager'
 import { canAccessTab, FEATURES, PLANS, BASIC_HISTORY_LIMIT } from '../lib/featureGates'
-import { loadSubscription, verifySubscription, applyPremiumUnlock, handleCheckoutReturn } from '../lib/subscriptionStore'
+import { loadSubscription, verifySubscription, applyPremiumUnlock, handleCheckoutReturn, openCustomerPortal } from '../lib/subscriptionStore'
 import { resumeAudio, playTap, playSwitch, playSuccess, playCoin, playWarn } from '../lib/sounds'
 import styles from '../styles/home.module.css'
 
@@ -40,9 +40,37 @@ export default function Home() {
   const [showPaywall, setShowPaywall] = useState(false)
   const [paywallFeature, setPaywallFeature] = useState(null)
   const [activeVenue, setActiveVenue] = useState(null)
+  const [toast, setToast] = useState(null)
   const spinCallbackRef = useRef(null)
   const calculatorRef = useRef(null)
   const [, forceUpdate] = useState(0)
+
+  /** Show a brief toast notification */
+  function showToast(msg, durationMs = 4000) {
+    setToast(msg)
+    setTimeout(() => setToast(null), durationMs)
+  }
+
+  /**
+   * Poll /api/me/subscription up to maxMs milliseconds until active=true.
+   * Returns the final response or null on timeout.
+   */
+  async function pollUntilActive(customerId, timeoutMs = 10000, intervalMs = 1500) {
+    const deadline = Date.now() + timeoutMs
+    while (Date.now() < deadline) {
+      try {
+        const res = await fetch(
+          `/api/me/subscription?customerId=${encodeURIComponent(customerId)}`
+        )
+        if (res.ok) {
+          const data = await res.json()
+          if (data.active) return data
+        }
+      } catch { /* ignore network errors during polling */ }
+      await new Promise((r) => setTimeout(r, intervalMs))
+    }
+    return null
+  }
 
   useEffect(() => {
     setSpins(loadSpins())
@@ -57,7 +85,7 @@ export default function Home() {
     const cached = loadSubscription()
     setPlan(cached.plan)
 
-    // Re-verify subscription status with Stripe in the background.
+    // Re-verify subscription status with the server in the background.
     // This ensures returning users within a paid month stay unlocked and
     // cancelled/expired subscriptions are revoked automatically.
     verifySubscription().then((sub) => {
@@ -68,43 +96,59 @@ export default function Home() {
     const params = new URLSearchParams(window.location.search)
 
     if (params.get('checkout') === 'success') {
-      // Checkout Session flow: verify with server then unlock
       const sessionId = params.get('session_id')
-      handleCheckoutReturn(sessionId).then((sub) => {
-        setPlan(sub.plan)
-        if (sub.plan === 'premium') {
+      // Remove query params immediately
+      window.history.replaceState({}, '', '/')
+
+      // First: verify the session directly with Stripe (doesn't depend on webhook)
+      handleCheckoutReturn(sessionId).then(async (sub) => {
+        if (sub.plan === PLANS.PREMIUM) {
+          setPlan(sub.plan)
           playSuccess()
-          alert('🎉 Welcome to Premium! All features are now unlocked.')
+          showToast('🎉 Subscription active! All features are now unlocked.')
+        } else if (sub.customerId) {
+          // Webhook may be in-flight — poll for up to 10 seconds
+          const data = await pollUntilActive(sub.customerId)
+          if (data) {
+            const unlocked = applyPremiumUnlock({
+              customerId: sub.customerId,
+              subscriptionId: data.subscriptionId,
+              currentPeriodEnd: data.currentPeriodEnd,
+              status: data.status,
+            })
+            setPlan(unlocked.plan)
+            playSuccess()
+            showToast('🎉 Subscription active! All features are now unlocked.')
+          } else {
+            showToast('Payment processing — please refresh in a few seconds if features remain locked.')
+          }
         } else {
-          // Verification failed — subscription state unchanged; user can retry via "Already paid?"
-          alert('Payment could not be verified yet. If you completed payment, please refresh the page or use the "Already paid?" button.')
+          showToast('Payment could not be verified yet. Please refresh or contact support.')
         }
       })
-      window.history.replaceState({}, '', '/')
-    } else if (params.get('checkout') === 'cancelled') {
-      alert('Checkout cancelled. You can upgrade any time from any locked feature.')
+    } else if (params.get('checkout') === 'cancel' || params.get('checkout') === 'cancelled') {
+      showToast('Checkout cancelled. You can upgrade any time from any locked feature.')
       window.history.replaceState({}, '', '/')
     } else if (params.get('upgrade') === 'success') {
       // Legacy Payment Link redirect — optimistic unlock
       const sub = applyPremiumUnlock()
       setPlan(sub.plan)
       playSuccess()
-      alert('🎉 Welcome to Premium! All features are now unlocked.')
+      showToast('🎉 Welcome to Premium! All features are now unlocked.')
       window.history.replaceState({}, '', '/')
     } else if (params.get('upgrade') === 'cancelled') {
-      alert('Checkout cancelled. You can upgrade any time from any locked feature.')
+      showToast('Checkout cancelled. You can upgrade any time from any locked feature.')
       window.history.replaceState({}, '', '/')
     } else if (params.get('session_id')) {
       // Legacy: session_id only (old redirect format without checkout=success)
-      handleCheckoutReturn(params.get('session_id')).then((sub) => {
+      const sessionId = params.get('session_id')
+      window.history.replaceState({}, '', '/')
+      handleCheckoutReturn(sessionId).then((sub) => {
         setPlan(sub.plan)
       })
-      window.history.replaceState({}, '', '/')
     }
 
     // ── Cross-tab sync ───────────────────────────────────────────────────────
-    // When the user completes checkout in another tab (or window), localStorage
-    // is updated there. We listen for that storage event and sync the plan state.
     function onStorage(e) {
       if (e.key === 'pokie-subscription') {
         const sub = loadSubscription()
@@ -179,11 +223,34 @@ export default function Home() {
 
   return (
     <div className={styles.shell} onClick={handleInteraction}>
+      {/* Toast notification */}
+      {toast && (
+        <div style={{
+          position: 'fixed', top: 16, left: '50%', transform: 'translateX(-50%)',
+          background: '#1e293b', color: '#f1f5f9', padding: '12px 24px',
+          borderRadius: 8, zIndex: 9999, boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
+          fontSize: 15, fontWeight: 500, maxWidth: '90vw', textAlign: 'center',
+        }}>
+          {toast}
+        </div>
+      )}
       <header className={styles.header}>
         <h1 className={styles.title}>POKIE ANALYZER</h1>
         <p className={styles.subtitle}>Smart Machine Tracker</p>
         <div className={styles.badgeRow}>
           <SubscriptionBadge plan={plan} onUpgradeClick={() => openPaywall()} />
+          {plan === PLANS.PREMIUM && (
+            <button
+              onClick={() => openCustomerPortal()}
+              style={{
+                marginLeft: 8, padding: '4px 12px', fontSize: 12,
+                background: 'transparent', color: '#94a3b8',
+                border: '1px solid #334155', borderRadius: 6, cursor: 'pointer',
+              }}
+            >
+              Manage billing
+            </button>
+          )}
         </div>
       </header>
 
