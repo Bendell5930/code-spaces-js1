@@ -55,8 +55,8 @@ export default function Home() {
    * Poll /api/me/subscription up to maxMs milliseconds until active=true.
    * Returns the final response or null on timeout.
    */
-  async function pollUntilActive(customerId, maxMs = 10000, intervalMs = 1500) {
-    const deadline = Date.now() + maxMs
+  async function pollUntilActive(customerId, timeoutMs = 10000, intervalMs = 1500) {
+    const deadline = Date.now() + timeoutMs
     while (Date.now() < deadline) {
       try {
         const res = await fetch(
@@ -120,7 +120,7 @@ export default function Home() {
             playSuccess()
             showToast('🎉 Subscription active! All features are now unlocked.')
           } else {
-            showToast('Payment received — refresh the page if features are still locked.')
+            showToast('Payment processing — please refresh in a few seconds if features remain locked.')
           }
         } else {
           showToast('Payment could not be verified yet. Please refresh or contact support.')
