@@ -196,7 +196,7 @@ export default function Landing() {
                 <li>All Machine Brands</li>
                 <li>AI Auto-Detection</li>
               </ul>
-              <a href={STRIPE_PREMIUM_LINK} target="_blank" rel="noopener noreferrer" className={`${s.priceBtn} ${s.priceBtnPremium}`}>Start Premium →</a>
+              <Link href="/?upgrade=1" className={`${s.priceBtn} ${s.priceBtnPremium}`}>Start Premium →</Link>
             </div>
           </div>
         </section>

@@ -11,3 +11,7 @@ To run this application:
 ```
 npm run dev
 ```
+
+## Setup
+
+To enable the full Stripe + Supabase subscription system (Premium plan), follow the step-by-step guide in [`docs/SETUP.md`](./docs/SETUP.md).

@@ -1,15 +1,65 @@
+import { useState } from 'react'
+import { useSupabaseClient } from '@supabase/auth-helpers-react'
 import { getPremiumFeatures, PLAN_DETAILS, PLANS } from '../lib/featureGates'
-import { openPremiumCheckout } from '../lib/stripeLinks'
+import { startCheckout } from '../lib/subscriptionStore'
 import { playTap, playSuccess } from '../lib/sounds'
 import styles from './Subscription.module.css'
+import AuthModal from './AuthModal'
 
 export default function PaywallModal({ feature, onClose }) {
+  const supabase = useSupabaseClient()
   const premiumFeatures = getPremiumFeatures()
   const premium = PLAN_DETAILS[PLANS.PREMIUM]
+  const [showAuth, setShowAuth] = useState(false)
+  const [loading, setLoading] = useState(false)
 
-  function handleUpgrade() {
+  async function handleUpgrade() {
     playSuccess()
-    openPremiumCheckout()
+    setLoading(true)
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+
+      if (!session) {
+        // Not signed in — show auth modal
+        setLoading(false)
+        setShowAuth(true)
+        return
+      }
+
+      // Signed in — go straight to checkout
+      await startCheckout()
+    } catch (err) {
+      setLoading(false)
+      if (err.message === 'NOT_AUTHENTICATED') {
+        setShowAuth(true)
+      } else {
+        alert('Unable to start checkout. Please try again.')
+      }
+    }
+  }
+
+  // After sign-in, automatically start checkout
+  async function handleAuthClose() {
+    setShowAuth(false)
+    const { data: { session } } = await supabase.auth.getSession()
+    if (session) {
+      onClose()
+      try {
+        await startCheckout()
+      } catch {
+        alert('Unable to start checkout. Please try again.')
+      }
+    }
+  }
+
+  if (showAuth) {
+    return (
+      <AuthModal
+        message="Sign in to upgrade to Premium"
+        onClose={handleAuthClose}
+      />
+    )
   }
 
   return (
@@ -45,8 +95,8 @@ export default function PaywallModal({ feature, onClose }) {
 
         {/* Actions */}
         <div className={styles.modalActions}>
-          <button className={styles.upgradeBtn} onClick={handleUpgrade}>
-            🚀 Upgrade to Premium
+          <button className={styles.upgradeBtn} onClick={handleUpgrade} disabled={loading}>
+            {loading ? 'Loading…' : '🚀 Upgrade to Premium'}
           </button>
           <button className={styles.laterBtn} onClick={() => { playTap(); onClose() }}>
             Maybe later

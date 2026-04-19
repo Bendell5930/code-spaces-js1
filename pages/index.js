@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { useSupabaseClient } from '@supabase/auth-helpers-react'
 import JackpotDisplay from '../components/JackpotDisplay'
 import SpinHistory from '../components/SpinHistory'
 import AIVideoCapture from '../components/AIVideoCapture'
@@ -13,7 +14,7 @@ import VenueInsights from '../components/VenueInsights'
 import ViralHub from '../components/ViralHub'
 import { recordSessionSpin } from '../lib/sessionManager'
 import { canAccessTab, FEATURES, PLANS, BASIC_HISTORY_LIMIT } from '../lib/featureGates'
-import { loadSubscription, verifySubscription, handleCheckoutReturn } from '../lib/subscriptionStore'
+import { loadSubscription, verifySubscription } from '../lib/subscriptionStore'
 import { resumeAudio, playTap, playSwitch, playSuccess, playCoin, playWarn } from '../lib/sounds'
 import styles from '../styles/home.module.css'
 
@@ -34,15 +35,23 @@ function saveSpins(spins) {
 }
 
 export default function Home() {
+  const supabase = useSupabaseClient()
   const [spins, setSpins] = useState([])
   const [tab, setTab] = useState('calc')
   const [plan, setPlan] = useState(PLANS.BASIC)
+  const [userEmail, setUserEmail] = useState(null)
   const [showPaywall, setShowPaywall] = useState(false)
   const [paywallFeature, setPaywallFeature] = useState(null)
   const [activeVenue, setActiveVenue] = useState(null)
+  const [toast, setToast] = useState(null)
   const spinCallbackRef = useRef(null)
   const calculatorRef = useRef(null)
   const [, forceUpdate] = useState(0)
+
+  function showToast(msg, durationMs = 4000) {
+    setToast(msg)
+    setTimeout(() => setToast(null), durationMs)
+  }
 
   useEffect(() => {
     setSpins(loadSpins())
@@ -53,28 +62,54 @@ export default function Home() {
       if (v) setActiveVenue(JSON.parse(v))
     } catch {}
 
-    // Load cached subscription
+    // Show cached plan immediately while server responds
     const cached = loadSubscription()
-    const initialPlan = cached.plan
-    setPlan(initialPlan)
+    setPlan(cached.plan)
+    if (cached.email) setUserEmail(cached.email)
 
-    // Verify with Stripe in background (only update if plan actually changed)
+    // Verify with server (authoritative)
     verifySubscription().then((sub) => {
-      if (sub.plan !== initialPlan) setPlan(sub.plan)
+      setPlan(sub.plan)
+      if (sub.email) setUserEmail(sub.email)
     })
 
     // Handle return from Stripe Checkout
     const params = new URLSearchParams(window.location.search)
-    const sessionId = params.get('session_id')
-    if (sessionId) {
-      handleCheckoutReturn(sessionId).then((sub) => {
-        if (sub) {
-          setPlan(sub.plan)
-          playSuccess()
-        }
-      })
-      // Clean URL
+    if (params.get('upgrade') === 'success') {
+      // Clean URL immediately
       window.history.replaceState({}, '', '/')
+
+      // Poll /api/me — webhook may take a moment to land
+      const poll = (attempt) => {
+        verifySubscription().then((sub) => {
+          setPlan(sub.plan)
+          if (sub.email) setUserEmail(sub.email)
+          if (sub.plan === PLANS.PREMIUM) {
+            playSuccess()
+            showToast('Welcome to Premium! 🎉')
+          } else if (attempt < 2) {
+            // Retry after 3s then 5s
+            setTimeout(() => poll(attempt + 1), attempt === 0 ? 3000 : 5000)
+          }
+        })
+      }
+      // First attempt after 2s
+      setTimeout(() => poll(0), 2000)
+    }
+
+    // Handle ?upgrade=1 from landing page — open paywall automatically
+    if (params.get('upgrade') === '1') {
+      window.history.replaceState({}, '', '/')
+      setShowPaywall(true)
+    }
+
+    // Handle return after sign-in from auth callback
+    if (params.get('signedin') === '1') {
+      window.history.replaceState({}, '', '/')
+      verifySubscription().then((sub) => {
+        setPlan(sub.plan)
+        if (sub.email) setUserEmail(sub.email)
+      })
     }
   }, [])
 
@@ -146,7 +181,7 @@ export default function Home() {
         <h1 className={styles.title}>POKIE ANALYZER</h1>
         <p className={styles.subtitle}>Smart Machine Tracker</p>
         <div className={styles.badgeRow}>
-          <SubscriptionBadge plan={plan} onUpgradeClick={() => openPaywall()} />
+          <SubscriptionBadge plan={plan} userEmail={userEmail} onUpgradeClick={() => openPaywall()} />
         </div>
       </header>
 
@@ -276,6 +311,29 @@ export default function Home() {
           feature={paywallFeature}
           onClose={() => setShowPaywall(false)}
         />
+      )}
+
+      {/* Toast notification */}
+      {toast && (
+        <div
+          style={{
+            position: 'fixed',
+            bottom: '2rem',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: '#1e293b',
+            border: '1px solid #fbbf24',
+            borderRadius: '10px',
+            padding: '0.75rem 1.25rem',
+            color: '#fbbf24',
+            fontWeight: 700,
+            fontSize: '0.9rem',
+            zIndex: 2000,
+            boxShadow: '0 0 20px rgba(251,191,36,0.2)',
+          }}
+        >
+          {toast}
+        </div>
       )}
 
       <footer className={styles.footer}>
