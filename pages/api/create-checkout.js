@@ -1,14 +1,12 @@
 /**
  * POST /api/create-checkout
  *
+ * Requires a valid Supabase JWT in the Authorization header.
  * Creates a Stripe Checkout Session for the Premium subscription.
- * Returns { sessionId } for client-side redirect.
+ * Returns { url } for client-side full-page redirect.
  */
-import Stripe from 'stripe'
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2024-06-20',
-})
+import stripe from '../../lib/stripeServer'
+import { supabaseAdmin } from '../../lib/supabaseClient'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -16,41 +14,56 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
+  // Verify Supabase JWT
+  const authHeader = req.headers.authorization || ''
+  const token = authHeader.replace(/^Bearer\s+/i, '').trim()
+  if (!token) {
+    return res.status(401).json({ error: 'Missing authorization token' })
+  }
+
+  let user
   try {
-    const { customerId } = req.body
+    const admin = supabaseAdmin()
+    const { data, error } = await admin.auth.getUser(token)
+    if (error || !data?.user) {
+      return res.status(401).json({ error: 'Invalid or expired token' })
+    }
+    user = data.user
+  } catch (err) {
+    console.error('Supabase auth error:', err.message)
+    return res.status(500).json({ error: 'Authentication service unavailable' })
+  }
+
+  if (!process.env.STRIPE_PRICE_ID) {
+    console.error('STRIPE_PRICE_ID is not set')
+    return res.status(500).json({ error: 'Payment configuration error' })
+  }
+
+  try {
     const origin = req.headers.origin || `https://${req.headers.host}`
 
-    const sessionParams = {
+    const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
       payment_method_types: ['card'],
       line_items: [
         {
-          price: process.env.STRIPE_PRICE_ID, // Your Premium price ID from Stripe dashboard
+          price: process.env.STRIPE_PRICE_ID,
           quantity: 1,
         },
       ],
-      success_url: `${origin}/?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/?checkout=cancelled`,
-      subscription_data: {
-        metadata: {
-          app: 'pokie-analyzer',
-          plan: 'premium',
-        },
+      success_url: `${origin}/?upgrade=success&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}/?upgrade=cancelled`,
+      client_reference_id: user.id,
+      customer_email: user.email,
+      metadata: {
+        supabase_user_id: user.id,
       },
-    }
+    })
 
-    // Attach to existing customer if we have one
-    if (customerId) {
-      sessionParams.customer = customerId
-    } else {
-      sessionParams.customer_creation = 'always'
-    }
-
-    const session = await stripe.checkout.sessions.create(sessionParams)
-
-    return res.status(200).json({ sessionId: session.id })
+    return res.status(200).json({ url: session.url })
   } catch (err) {
     console.error('Stripe checkout error:', err.message)
     return res.status(500).json({ error: 'Failed to create checkout session' })
   }
 }
+

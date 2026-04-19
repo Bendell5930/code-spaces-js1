@@ -1,15 +1,54 @@
+import { useState } from 'react'
 import { getPremiumFeatures, PLAN_DETAILS, PLANS } from '../lib/featureGates'
-import { openPremiumCheckout } from '../lib/stripeLinks'
+import { startCheckout, NEEDS_LOGIN } from '../lib/subscriptionStore'
 import { playTap, playSuccess } from '../lib/sounds'
+import AuthModal from './AuthModal'
 import styles from './Subscription.module.css'
+
+const PENDING_UPGRADE_KEY = 'pokie-pending-upgrade'
 
 export default function PaywallModal({ feature, onClose }) {
   const premiumFeatures = getPremiumFeatures()
   const premium = PLAN_DETAILS[PLANS.PREMIUM]
+  const [showAuth, setShowAuth] = useState(false)
+  const [checkoutError, setCheckoutError] = useState(null)
+  const [loading, setLoading] = useState(false)
 
-  function handleUpgrade() {
+  async function handleUpgrade() {
     playSuccess()
-    openPremiumCheckout()
+    setCheckoutError(null)
+    setLoading(true)
+    try {
+      await startCheckout()
+      // startCheckout does a full-page redirect; we only get here on error
+    } catch (err) {
+      if (err === NEEDS_LOGIN) {
+        // Set a pending flag so index.js continues after login
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(PENDING_UPGRADE_KEY, 'true')
+        }
+        setLoading(false)
+        setShowAuth(true)
+      } else {
+        setCheckoutError(err?.message || 'Something went wrong. Please try again.')
+        setLoading(false)
+      }
+    }
+  }
+
+  if (showAuth) {
+    return (
+      <AuthModal
+        message="Sign in to upgrade — we'll send you a magic link, then take you to checkout."
+        onClose={() => {
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem(PENDING_UPGRADE_KEY)
+          }
+          setShowAuth(false)
+          onClose()
+        }}
+      />
+    )
   }
 
   return (
@@ -43,10 +82,20 @@ export default function PaywallModal({ feature, onClose }) {
           <span className={styles.priceNote}>Cancel anytime · Instant access</span>
         </div>
 
+        {checkoutError && (
+          <p style={{ color: '#f87171', fontSize: '0.75rem', marginBottom: '0.5rem', textAlign: 'center' }}>
+            {checkoutError}
+          </p>
+        )}
+
         {/* Actions */}
         <div className={styles.modalActions}>
-          <button className={styles.upgradeBtn} onClick={handleUpgrade}>
-            🚀 Upgrade to Premium
+          <button
+            className={styles.upgradeBtn}
+            onClick={handleUpgrade}
+            disabled={loading}
+          >
+            {loading ? 'Loading…' : '🚀 Upgrade to Premium'}
           </button>
           <button className={styles.laterBtn} onClick={() => { playTap(); onClose() }}>
             Maybe later
@@ -56,3 +105,4 @@ export default function PaywallModal({ feature, onClose }) {
     </div>
   )
 }
+

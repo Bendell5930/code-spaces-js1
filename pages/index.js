@@ -13,11 +13,13 @@ import VenueInsights from '../components/VenueInsights'
 import ViralHub from '../components/ViralHub'
 import { recordSessionSpin } from '../lib/sessionManager'
 import { canAccessTab, FEATURES, PLANS, BASIC_HISTORY_LIMIT } from '../lib/featureGates'
-import { loadSubscription, verifySubscription, handleCheckoutReturn } from '../lib/subscriptionStore'
+import { loadSubscription, verifySubscription, startCheckout, NEEDS_LOGIN } from '../lib/subscriptionStore'
+import { supabase } from '../lib/supabaseClient'
 import { resumeAudio, playTap, playSwitch, playSuccess, playCoin, playWarn } from '../lib/sounds'
 import styles from '../styles/home.module.css'
 
 const STORAGE_KEY = 'pokie-analyzer-spins'
+const PENDING_UPGRADE_KEY = 'pokie-pending-upgrade'
 
 function loadSpins() {
   if (typeof window === 'undefined') return []
@@ -37,12 +39,19 @@ export default function Home() {
   const [spins, setSpins] = useState([])
   const [tab, setTab] = useState('calc')
   const [plan, setPlan] = useState(PLANS.BASIC)
+  const [userEmail, setUserEmail] = useState(null)
   const [showPaywall, setShowPaywall] = useState(false)
   const [paywallFeature, setPaywallFeature] = useState(null)
   const [activeVenue, setActiveVenue] = useState(null)
+  const [toast, setToast] = useState(null)
   const spinCallbackRef = useRef(null)
   const calculatorRef = useRef(null)
   const [, forceUpdate] = useState(0)
+
+  function showToast(message, duration = 4000) {
+    setToast(message)
+    setTimeout(() => setToast(null), duration)
+  }
 
   useEffect(() => {
     setSpins(loadSpins())
@@ -53,28 +62,72 @@ export default function Home() {
       if (v) setActiveVenue(JSON.parse(v))
     } catch {}
 
-    // Load cached subscription
+    // Load cached subscription for instant render
     const cached = loadSubscription()
-    const initialPlan = cached.plan
-    setPlan(initialPlan)
+    setPlan(cached.plan)
+    if (cached.email) setUserEmail(cached.email)
 
-    // Verify with Stripe in background (only update if plan actually changed)
-    verifySubscription().then((sub) => {
-      if (sub.plan !== initialPlan) setPlan(sub.plan)
+    // Handle URL params from Stripe / Supabase auth callbacks
+    const params = new URLSearchParams(window.location.search)
+    const upgradeStatus = params.get('upgrade')
+    const loginStatus = params.get('login')
+    // Clean URL early so back/forward won't re-trigger
+    if (upgradeStatus || loginStatus) {
+      window.history.replaceState({}, '', '/')
+    }
+
+    // Subscribe to Supabase auth state changes
+    const { data: { subscription: authSub } } = supabase.auth.onAuthStateChange(
+      async (_event, session) => {
+        if (session) {
+          setUserEmail(session.user.email)
+          const sub = await verifySubscription()
+          setPlan(sub.plan)
+          if (sub.email) setUserEmail(sub.email)
+
+          // If we have a pending upgrade, trigger checkout now
+          if (localStorage.getItem(PENDING_UPGRADE_KEY) === 'true') {
+            localStorage.removeItem(PENDING_UPGRADE_KEY)
+            try {
+              await startCheckout()
+            } catch (err) {
+              if (err !== NEEDS_LOGIN) {
+                showToast('⚠️ Checkout failed. Please try again.')
+              }
+            }
+          }
+        } else {
+          setUserEmail(null)
+          setPlan(PLANS.BASIC)
+        }
+      }
+    )
+
+    // Get current session on mount
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (session) {
+        setUserEmail(session.user.email)
+        const sub = await verifySubscription()
+        setPlan(sub.plan)
+        if (sub.email) setUserEmail(sub.email)
+      }
     })
 
     // Handle return from Stripe Checkout
-    const params = new URLSearchParams(window.location.search)
-    const sessionId = params.get('session_id')
-    if (sessionId) {
-      handleCheckoutReturn(sessionId).then((sub) => {
-        if (sub) {
-          setPlan(sub.plan)
-          playSuccess()
-        }
-      })
-      // Clean URL
-      window.history.replaceState({}, '', '/')
+    if (upgradeStatus === 'success') {
+      // Give webhook 2s to process, then re-verify
+      setTimeout(async () => {
+        const sub = await verifySubscription()
+        setPlan(sub.plan)
+        playSuccess()
+        showToast('🎉 Welcome to Premium! Your locks are now removed.')
+      }, 2000)
+    } else if (upgradeStatus === 'cancelled') {
+      showToast('Checkout cancelled.')
+    }
+
+    return () => {
+      authSub.unsubscribe()
     }
   }, [])
 
@@ -146,9 +199,32 @@ export default function Home() {
         <h1 className={styles.title}>POKIE ANALYZER</h1>
         <p className={styles.subtitle}>Smart Machine Tracker</p>
         <div className={styles.badgeRow}>
-          <SubscriptionBadge plan={plan} onUpgradeClick={() => openPaywall()} />
+          <SubscriptionBadge
+            plan={plan}
+            email={userEmail}
+            onUpgradeClick={() => openPaywall()}
+          />
         </div>
       </header>
+
+      {toast && (
+        <div style={{
+          position: 'fixed',
+          top: '1rem',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          background: '#1e293b',
+          border: '1px solid #fbbf24',
+          color: '#f1f5f9',
+          padding: '0.6rem 1.25rem',
+          borderRadius: '8px',
+          zIndex: 2000,
+          fontSize: '0.85rem',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
+        }}>
+          {toast}
+        </div>
+      )}
 
       <main className={styles.main}>
         <JackpotDisplay />
