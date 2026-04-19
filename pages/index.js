@@ -291,6 +291,8 @@ export default function Home() {
           | 1800 858 858
           {' · '}
           <a href="/privacy">Privacy Policy</a>
+          {' · '}
+          <a href="/terms">Terms of Service</a>
         </p>
       </footer>
     </div>
