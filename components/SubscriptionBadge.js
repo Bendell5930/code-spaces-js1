@@ -1,5 +1,5 @@
 import { PLAN_DETAILS, PLANS } from '../lib/featureGates'
-import { openCustomerPortal } from '../lib/subscriptionStore'
+import { openCustomerPortal, applyPremiumUnlock } from '../lib/subscriptionStore'
 import { playTap } from '../lib/sounds'
 import styles from './Subscription.module.css'
 
@@ -16,6 +16,13 @@ export default function SubscriptionBadge({ plan, onUpgradeClick }) {
     }
   }
 
+  function handleRestorePremium() {
+    if (confirm('Have you already paid for Premium on Stripe? Click OK to unlock.')) {
+      applyPremiumUnlock()
+      window.location.reload()
+    }
+  }
+
   return (
     <div className={styles.badge} style={{ borderColor: details.color }}>
       <span className={styles.badgeEmoji}>{details.emoji}</span>
@@ -27,12 +34,17 @@ export default function SubscriptionBadge({ plan, onUpgradeClick }) {
           Manage
         </button>
       ) : (
-        <button
-          className={styles.upgradeBadgeBtn}
-          onClick={() => { playTap(); onUpgradeClick() }}
-        >
-          👑 Upgrade
-        </button>
+        <>
+          <button
+            className={styles.upgradeBadgeBtn}
+            onClick={() => { playTap(); onUpgradeClick() }}
+          >
+            👑 Upgrade
+          </button>
+          <button className={styles.manageBtn} onClick={handleRestorePremium}>
+            Already paid?
+          </button>
+        </>
       )}
     </div>
   )
