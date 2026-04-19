@@ -3,6 +3,7 @@ import '../global.css'
 import TermsOfService from '../components/TermsOfService'
 import VenuePrivacyMode from '../components/VenuePrivacyMode'
 import LaunchReminder from '../components/LaunchReminder'
+import { Analytics } from '@vercel/analytics/next'
 
 export default function MyApp({ Component, pageProps }) {
   useEffect(() => {
@@ -18,12 +19,15 @@ export default function MyApp({ Component, pageProps }) {
   }, [])
 
   return (
-    <TermsOfService>
-      <VenuePrivacyMode>
-        <LaunchReminder>
-          <Component {...pageProps} />
-        </LaunchReminder>
-      </VenuePrivacyMode>
-    </TermsOfService>
+    <>
+      <TermsOfService>
+        <VenuePrivacyMode>
+          <LaunchReminder>
+            <Component {...pageProps} />
+          </LaunchReminder>
+        </VenuePrivacyMode>
+      </TermsOfService>
+      <Analytics />
+    </>
   )
 }
