@@ -13,7 +13,7 @@ import VenueInsights from '../components/VenueInsights'
 import ViralHub from '../components/ViralHub'
 import { recordSessionSpin } from '../lib/sessionManager'
 import { canAccessTab, FEATURES, PLANS, BASIC_HISTORY_LIMIT } from '../lib/featureGates'
-import { loadSubscription, verifySubscription, handleCheckoutReturn } from '../lib/subscriptionStore'
+import { loadSubscription, verifySubscription, applyPremiumUnlock } from '../lib/subscriptionStore'
 import { resumeAudio, playTap, playSwitch, playSuccess, playCoin, playWarn } from '../lib/sounds'
 import styles from '../styles/home.module.css'
 
@@ -63,17 +63,22 @@ export default function Home() {
       if (sub.plan !== initialPlan) setPlan(sub.plan)
     })
 
-    // Handle return from Stripe Checkout
+    // Handle return from Stripe Payment Link
     const params = new URLSearchParams(window.location.search)
-    const sessionId = params.get('session_id')
-    if (sessionId) {
-      handleCheckoutReturn(sessionId).then((sub) => {
-        if (sub) {
-          setPlan(sub.plan)
-          playSuccess()
-        }
-      })
-      // Clean URL
+    if (params.get('upgrade') === 'success') {
+      const sub = applyPremiumUnlock()
+      setPlan(sub.plan)
+      playSuccess()
+      alert('🎉 Welcome to Premium! All features are now unlocked.')
+      window.history.replaceState({}, '', '/')
+    } else if (params.get('upgrade') === 'cancelled') {
+      alert('Checkout cancelled. You can upgrade any time from any locked feature.')
+      window.history.replaceState({}, '', '/')
+    } else if (params.get('session_id')) {
+      // Legacy session_id param — treat as successful upgrade for backward compat
+      const sub = applyPremiumUnlock()
+      setPlan(sub.plan)
+      playSuccess()
       window.history.replaceState({}, '', '/')
     }
   }, [])
