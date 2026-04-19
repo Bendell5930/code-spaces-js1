@@ -1,6 +1,7 @@
 import Head from 'next/head'
 import Link from 'next/link'
 import s from '../styles/landing.module.css'
+import { STRIPE_PREMIUM_LINK } from '../lib/stripeLinks'
 
 export default function Landing() {
   return (
@@ -195,7 +196,7 @@ export default function Landing() {
                 <li>All Machine Brands</li>
                 <li>AI Auto-Detection</li>
               </ul>
-              <Link href="/" className={`${s.priceBtn} ${s.priceBtnPremium}`}>Start Premium →</Link>
+              <a href={STRIPE_PREMIUM_LINK} target="_blank" rel="noopener noreferrer" className={`${s.priceBtn} ${s.priceBtnPremium}`}>Start Premium →</a>
             </div>
           </div>
         </section>
@@ -227,6 +228,7 @@ export default function Landing() {
           <span className={s.footerLeft}>© {new Date().getFullYear()} Pokie Analyzer</span>
           <div className={s.footerLinks}>
             <Link href="/privacy" className={s.footerLink}>Privacy Policy</Link>
+            <Link href="/terms" className={s.footerLink}>Terms of Service</Link>
             <Link href="/" className={s.footerLink}>Open App</Link>
             <a
               className={s.footerLink}

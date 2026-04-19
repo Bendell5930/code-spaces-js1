@@ -1,5 +1,5 @@
 import { getPremiumFeatures, PLAN_DETAILS, PLANS } from '../lib/featureGates'
-import { startCheckout } from '../lib/subscriptionStore'
+import { openPremiumCheckout } from '../lib/stripeLinks'
 import { playTap, playSuccess } from '../lib/sounds'
 import styles from './Subscription.module.css'
 
@@ -7,14 +7,9 @@ export default function PaywallModal({ feature, onClose }) {
   const premiumFeatures = getPremiumFeatures()
   const premium = PLAN_DETAILS[PLANS.PREMIUM]
 
-  async function handleUpgrade() {
+  function handleUpgrade() {
     playSuccess()
-    try {
-      await startCheckout()
-    } catch (err) {
-      console.error('Checkout error:', err)
-      alert('Unable to start checkout. Please try again.')
-    }
+    openPremiumCheckout()
   }
 
   return (
