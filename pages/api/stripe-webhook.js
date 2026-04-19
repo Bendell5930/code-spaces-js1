@@ -158,7 +158,7 @@ export default async function handler(req, res) {
   } catch (err) {
     console.error('stripe-webhook: handler error', err.message)
     // Still return 200 to prevent Stripe retrying immediately
-    return res.status(200).json({ received: true, error: err.message })
+    return res.status(200).json({ received: true })
   }
 
   return res.status(200).json({ received: true })

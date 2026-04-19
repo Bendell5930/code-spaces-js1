@@ -34,6 +34,10 @@ function saveSpins(spins) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(spins))
 }
 
+const UPGRADE_POLL_INITIAL_MS = 2000
+const UPGRADE_POLL_FIRST_RETRY_MS = 3000
+const UPGRADE_POLL_SECOND_RETRY_MS = 5000
+
 export default function Home() {
   const supabase = useSupabaseClient()
   const [spins, setSpins] = useState([])
@@ -89,12 +93,12 @@ export default function Home() {
             showToast('Welcome to Premium! 🎉')
           } else if (attempt < 2) {
             // Retry after 3s then 5s
-            setTimeout(() => poll(attempt + 1), attempt === 0 ? 3000 : 5000)
+            setTimeout(() => poll(attempt + 1), attempt === 0 ? UPGRADE_POLL_FIRST_RETRY_MS : UPGRADE_POLL_SECOND_RETRY_MS)
           }
         })
       }
       // First attempt after 2s
-      setTimeout(() => poll(0), 2000)
+      setTimeout(() => poll(0), UPGRADE_POLL_INITIAL_MS)
     }
 
     // Handle ?upgrade=1 from landing page — open paywall automatically
