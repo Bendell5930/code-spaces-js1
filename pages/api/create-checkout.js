@@ -2,7 +2,7 @@
  * POST /api/create-checkout
  *
  * Creates a Stripe Checkout Session for the Premium subscription.
- * Returns { sessionId } for client-side redirect.
+ * Returns { sessionId, url } for client-side redirect.
  */
 import Stripe from 'stripe'
 
@@ -17,7 +17,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { customerId } = req.body
+    const { customerId, userId } = req.body
     const origin = req.headers.origin || `https://${req.headers.host}`
 
     const sessionParams = {
@@ -25,7 +25,7 @@ export default async function handler(req, res) {
       payment_method_types: ['card'],
       line_items: [
         {
-          price: process.env.STRIPE_PRICE_ID, // Your Premium price ID from Stripe dashboard
+          price: process.env.STRIPE_PRICE_ID,
           quantity: 1,
         },
       ],
@@ -39,16 +39,22 @@ export default async function handler(req, res) {
       },
     }
 
-    // Attach to existing customer if we have one
+    // Attach to existing Stripe customer if we have one
     if (customerId) {
       sessionParams.customer = customerId
     } else {
       sessionParams.customer_creation = 'always'
     }
 
+    // Link the checkout to the app user so webhooks can resolve which user to update
+    if (userId) {
+      sessionParams.client_reference_id = String(userId)
+      sessionParams.subscription_data.metadata.userId = String(userId)
+    }
+
     const session = await stripe.checkout.sessions.create(sessionParams)
 
-    return res.status(200).json({ sessionId: session.id })
+    return res.status(200).json({ sessionId: session.id, url: session.url })
   } catch (err) {
     console.error('Stripe checkout error:', err.message)
     return res.status(500).json({ error: 'Failed to create checkout session' })
