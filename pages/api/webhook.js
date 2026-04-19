@@ -19,6 +19,7 @@
  * write the subscription state there.
  */
 import Stripe from 'stripe'
+import { setSubscription, setCustomerForUser } from '../../lib/subscriptionDb'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: '2024-06-20',
@@ -66,43 +67,59 @@ export default async function handler(req, res) {
   switch (event.type) {
     case 'checkout.session.completed': {
       const session = event.data.object
-      // Payment is confirmed. The client will call /api/verify-session after
-      // being redirected back from Stripe, which reads directly from Stripe API.
+      const customerId = session.customer
+      const subscriptionId = session.subscription
+      const userId = session.client_reference_id
       console.log(
-        `[webhook] checkout.session.completed — customer=${session.customer}` +
-        ` subscription=${session.subscription}` +
-        ` client_reference_id=${session.client_reference_id}`
+        `[webhook] checkout.session.completed — customer=${customerId}` +
+        ` subscription=${subscriptionId}` +
+        ` client_reference_id=${userId}`
       )
+      if (userId && customerId) {
+        await setCustomerForUser(userId, customerId)
+      }
+      if (subscriptionId && customerId) {
+        const sub = await stripe.subscriptions.retrieve(subscriptionId)
+        await setSubscription(customerId, {
+          subscriptionId: sub.id,
+          status: sub.status,
+          currentPeriodEnd: sub.current_period_end,
+        })
+      }
       break
     }
 
     case 'invoice.paid': {
-      // Covers both the initial payment and all future renewals.
       const invoice = event.data.object
-      const sub = invoice.subscription
+      const customerId = invoice.customer
+      const subscriptionId = invoice.subscription
       console.log(
-        `[webhook] invoice.paid — customer=${invoice.customer}` +
-        ` subscription=${sub}` +
-        ` period_end=${invoice.period_end}`
+        `[webhook] invoice.paid — customer=${customerId}` +
+        ` subscription=${subscriptionId}`
       )
-      // TODO: If you add a database, update the user record here:
-      // await db.user.updateByStripeCustomerId(invoice.customer, {
-      //   subscriptionActive: true,
-      //   // current_period_end lives on the subscription, not the invoice root
-      //   subscriptionExpiresAt: new Date(invoice.lines.data[0].period.end * 1000),
-      // })
+      if (subscriptionId && customerId) {
+        const sub = await stripe.subscriptions.retrieve(subscriptionId)
+        await setSubscription(customerId, {
+          subscriptionId: sub.id,
+          status: sub.status,
+          currentPeriodEnd: sub.current_period_end,
+        })
+      }
       break
     }
 
     case 'customer.subscription.updated': {
       const subscription = event.data.object
-      const isActive = ['active', 'trialing'].includes(subscription.status)
       console.log(
         `[webhook] customer.subscription.updated — id=${subscription.id}` +
         ` status=${subscription.status}` +
         ` current_period_end=${subscription.current_period_end}`
       )
-      // TODO: update DB — subscription.customer, isActive, subscription.current_period_end
+      await setSubscription(subscription.customer, {
+        subscriptionId: subscription.id,
+        status: subscription.status,
+        currentPeriodEnd: subscription.current_period_end,
+      })
       break
     }
 
@@ -112,7 +129,11 @@ export default async function handler(req, res) {
         `[webhook] customer.subscription.deleted — id=${subscription.id}` +
         ` customer=${subscription.customer}`
       )
-      // TODO: update DB — mark subscriptionActive=false for subscription.customer
+      await setSubscription(subscription.customer, {
+        subscriptionId: subscription.id,
+        status: 'canceled',
+        currentPeriodEnd: subscription.current_period_end,
+      })
       break
     }
 
@@ -120,9 +141,9 @@ export default async function handler(req, res) {
       const invoice = event.data.object
       console.warn(
         `[webhook] invoice.payment_failed — customer=${invoice.customer}` +
-        ` subscription=${invoice.subscription}`
+        ` subscription=${invoice.subscription}` +
+        ` attempt=${invoice.attempt_count}`
       )
-      // TODO: notify user, update DB — subscription may still be within grace period
       break
     }
 

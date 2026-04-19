@@ -20,17 +20,24 @@ export default async function handler(req, res) {
     const { customerId, userId } = req.body
     const origin = req.headers.origin || `https://${req.headers.host}`
 
+    // Support both env var names; STRIPE_PRICE_MONTHLY is canonical
+    const priceId = process.env.STRIPE_PRICE_MONTHLY || process.env.STRIPE_PRICE_ID
+    if (!priceId) {
+      console.error('[create-checkout] No price ID configured. Set STRIPE_PRICE_MONTHLY env var.')
+      return res.status(500).json({ error: 'Subscription price not configured' })
+    }
+
     const sessionParams = {
       mode: 'subscription',
-      payment_method_types: ['card'],
       line_items: [
         {
-          price: process.env.STRIPE_PRICE_ID,
+          price: priceId,
           quantity: 1,
         },
       ],
       success_url: `${origin}/?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/?checkout=cancelled`,
+      cancel_url: `${origin}/?checkout=cancel`,
+      allow_promotion_codes: true,
       subscription_data: {
         metadata: {
           app: 'pokie-analyzer',
