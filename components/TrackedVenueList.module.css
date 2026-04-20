@@ -1,0 +1,328 @@
+/* TrackedVenueList — shared UI for managing the tracked venues list */
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ── Tabs ── */
+.tabs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.tab {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 8px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #94a3b8;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.tab:hover {
+  color: #f1f5f9;
+  border-color: #475569;
+}
+
+.tabActive {
+  color: #0f172a;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  border-color: #f59e0b;
+}
+
+/* ── Section ── */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.count {
+  font-size: 11px;
+  font-weight: 700;
+  color: #94a3b8;
+  background: #0f172a;
+  padding: 3px 10px;
+  border-radius: 12px;
+  border: 1px solid #334155;
+}
+
+/* ── Action bar ── */
+.actionBar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.primaryBtn {
+  flex: 1 1 auto;
+  padding: 10px 14px;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #0f172a;
+  font-size: 13px;
+  font-weight: 700;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: filter 0.15s;
+}
+
+.primaryBtn:hover {
+  filter: brightness(1.1);
+}
+
+.secondaryBtn {
+  flex: 0 1 auto;
+  padding: 10px 14px;
+  background: #1e293b;
+  color: #cbd5e1;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.secondaryBtn:hover {
+  border-color: #f59e0b;
+  color: #f1f5f9;
+}
+
+/* ── Empty state ── */
+.empty {
+  text-align: center;
+  padding: 28px 12px;
+  background: #0f172a;
+  border: 1px dashed #334155;
+  border-radius: 12px;
+}
+
+.emptyIcon {
+  font-size: 32px;
+  margin-bottom: 6px;
+}
+
+.emptyTitle {
+  margin: 0;
+  color: #cbd5e1;
+  font-weight: 600;
+}
+
+.emptyHint {
+  margin-top: 6px;
+  margin-bottom: 12px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.emptyActions {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* ── Lists ── */
+.list,
+.browseList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.browseList {
+  max-height: 60vh;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.cardWrap {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+}
+
+.card {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.card:hover {
+  border-color: #f59e0b;
+  background: #243046;
+}
+
+.venueName {
+  color: #f1f5f9;
+  font-weight: 700;
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.venueMeta {
+  color: #64748b;
+  font-size: 11px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Add / Remove buttons ── */
+.addBtn {
+  flex: 0 0 auto;
+  padding: 0 14px;
+  background: rgba(34, 197, 94, 0.10);
+  color: #22c55e;
+  border: 1px solid #14532d;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.addBtn:hover {
+  background: rgba(34, 197, 94, 0.20);
+  border-color: #22c55e;
+}
+
+.removeBtn {
+  flex: 0 0 auto;
+  padding: 0 14px;
+  background: rgba(239, 68, 68, 0.10);
+  color: #ef4444;
+  border: 1px solid #3b1218;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.removeBtn:hover {
+  background: rgba(239, 68, 68, 0.20);
+  border-color: #ef4444;
+}
+
+/* ── Filters ── */
+.search {
+  width: 100%;
+  padding: 10px 12px;
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  color: #f1f5f9;
+  font-size: 13px;
+  box-sizing: border-box;
+}
+
+.search:focus {
+  outline: none;
+  border-color: #f59e0b;
+}
+
+.search::placeholder { color: #475569; }
+
+.filterRow {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.filterSelect {
+  flex: 1 1 140px;
+  min-width: 0;
+  padding: 8px 10px;
+  background: #0f172a;
+  color: #f1f5f9;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.resultMeta {
+  font-size: 11px;
+  color: #64748b;
+  font-weight: 600;
+}
+
+/* ── Form ── */
+.helpText {
+  font-size: 12px;
+  color: #94a3b8;
+  margin: 0;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.formInput {
+  padding: 10px 12px;
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  color: #f1f5f9;
+  font-size: 13px;
+  box-sizing: border-box;
+}
+
+.formInput:focus {
+  outline: none;
+  border-color: #f59e0b;
+}
+
+.formInput::placeholder { color: #475569; }
+
+.formActions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.errorText {
+  color: #ef4444;
+  font-size: 12px;
+  font-weight: 600;
+}

@@ -4,20 +4,19 @@ import {
   ResponsiveContainer, Cell, Legend as RLegend,
 } from 'recharts'
 import {
-  getVenueAnalytics, getMachineGraphData, getTrackedVenues,
+  getVenueAnalytics, getMachineGraphData,
   getSessionLog, seedDemoData, WIN_THRESHOLDS,
-  getUserTrackedVenues, isVenueTracked, trackVenue, untrackVenue, getTrackedCount,
 } from '../lib/venueAnalytics'
 import { getVenueLegend, lookupCode, hasLegendData } from '../lib/machineLegend'
 import {
-  QLD_VENUES, getAllVenues, getAllRegions, searchVenues,
-  addCustomVenue, getVenueMachines,
+  QLD_VENUES, getAllVenues, getVenueMachines,
 } from '../data/qldVenues'
+import TrackedVenueList from './TrackedVenueList'
 import styles from './VenueInsights.module.css'
 
 // ─── Constants ───
 
-const VIEWS = { MY_VENUES: 'my', BROWSE: 'browse', FEED: 'feed', ADD: 'add' }
+const VIEWS = { MANAGE: 'manage', FEED: 'feed' }
 const STATUS_COLORS = { WET: '#22c55e', NEUTRAL: '#f59e0b', DRY: '#ef4444' }
 const WIN_CATS = [
   { key: 'Wins $50+', color: '#38bdf8' },
@@ -30,16 +29,11 @@ const WIN_CATS = [
 // ─── Component ───
 
 export default function VenueInsights({ activeVenue, onSetActiveVenue }) {
-  const [view, setView] = useState(VIEWS.MY_VENUES)
-  const [trackedVenues, setTrackedVenues] = useState([])
-  const [userTracked, setUserTracked] = useState([])
+  const [view, setView] = useState(VIEWS.MANAGE)
   const [selectedVenueId, setSelectedVenueId] = useState(null)
   const [selectedMachine, setSelectedMachine] = useState(null)
   const [showLegend, setShowLegend] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [browseRegion, setBrowseRegion] = useState(null)
   const [sessionLog, setSessionLog] = useState([])
-  const [addForm, setAddForm] = useState({ name: '', suburb: '', region: '' })
   const [refreshKey, setRefreshKey] = useState(0)
 
   // Seed demo data on first load
@@ -49,39 +43,9 @@ export default function VenueInsights({ activeVenue, onSetActiveVenue }) {
   }, [])
 
   function reload() {
-    setTrackedVenues(getTrackedVenues())
-    setUserTracked(getUserTrackedVenues())
     setSessionLog(getSessionLog())
     setRefreshKey(k => k + 1)
   }
-
-  // Merge session-based venues with user-tracked venues for the "My Venues" list
-  const mergedVenues = useMemo(() => {
-    const map = new Map()
-    // Session-based venues first
-    trackedVenues.forEach(v => map.set(v.venueId, { ...v, hasData: true, isUserTracked: false }))
-    // Overlay user-tracked venues
-    userTracked.forEach(v => {
-      if (map.has(v.id)) {
-        map.get(v.id).isUserTracked = true
-        map.get(v.id).addedAt = v.addedAt
-      } else {
-        map.set(v.id, {
-          venueId: v.id,
-          venueName: v.name,
-          suburb: v.suburb,
-          region: v.region,
-          machineCount: 0,
-          sessionCount: 0,
-          lastActivity: v.addedAt || 0,
-          hasData: false,
-          isUserTracked: true,
-          addedAt: v.addedAt,
-        })
-      }
-    })
-    return [...map.values()].sort((a, b) => b.lastActivity - a.lastActivity)
-  }, [trackedVenues, userTracked])
 
   // ─── Venue Analytics ───
 
@@ -102,19 +66,6 @@ export default function VenueInsights({ activeVenue, onSetActiveVenue }) {
     return getVenueLegend(selectedVenueId)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedVenueId, refreshKey])
-
-  // ─── Browse data ───
-
-  const regions = useMemo(() => getAllRegions(), [refreshKey])
-  const searchResults = useMemo(() => {
-    if (searchQuery.length < 2) return []
-    return searchVenues(searchQuery).slice(0, 15)
-  }, [searchQuery])
-
-  const browseVenues = useMemo(() => {
-    if (!browseRegion) return []
-    return getAllVenues().filter(v => v.region === browseRegion)
-  }, [browseRegion, refreshKey])
 
   // ─── Helpers ───
 
@@ -138,26 +89,7 @@ export default function VenueInsights({ activeVenue, onSetActiveVenue }) {
   function handleSelectVenue(venueId) {
     setSelectedVenueId(venueId)
     setSelectedMachine(null)
-    setView(VIEWS.MY_VENUES)
-  }
-
-  function handleAddVenue(e) {
-    e.preventDefault()
-    if (!addForm.name.trim()) return
-    addCustomVenue(addForm)
-    setAddForm({ name: '', suburb: '', region: '' })
-    reload()
-    setView(VIEWS.MY_VENUES)
-  }
-
-  function handleTrackVenue(venue) {
-    trackVenue(venue)
-    reload()
-  }
-
-  function handleUntrackVenue(venueId) {
-    untrackVenue(venueId)
-    reload()
+    setView(VIEWS.MANAGE)
   }
 
   // ═══════════════════════════════════════
@@ -170,28 +102,16 @@ export default function VenueInsights({ activeVenue, onSetActiveVenue }) {
       {/* ─── Navigation ─── */}
       <div className={styles.nav}>
         <button
-          className={`${styles.navBtn} ${view === VIEWS.MY_VENUES ? styles.navActive : ''}`}
-          onClick={() => { setView(VIEWS.MY_VENUES); setSelectedVenueId(null); setSelectedMachine(null) }}
+          className={`${styles.navBtn} ${view === VIEWS.MANAGE ? styles.navActive : ''}`}
+          onClick={() => { setView(VIEWS.MANAGE); setSelectedVenueId(null); setSelectedMachine(null) }}
         >
           📊 My Venues
-        </button>
-        <button
-          className={`${styles.navBtn} ${view === VIEWS.BROWSE ? styles.navActive : ''}`}
-          onClick={() => setView(VIEWS.BROWSE)}
-        >
-          🔍 Browse
         </button>
         <button
           className={`${styles.navBtn} ${view === VIEWS.FEED ? styles.navActive : ''}`}
           onClick={() => { setView(VIEWS.FEED); reload() }}
         >
           📋 Activity
-        </button>
-        <button
-          className={`${styles.navBtn} ${view === VIEWS.ADD ? styles.navActive : ''}`}
-          onClick={() => setView(VIEWS.ADD)}
-        >
-          ➕ Add Venue
         </button>
       </div>
 
@@ -203,62 +123,13 @@ export default function VenueInsights({ activeVenue, onSetActiveVenue }) {
         </div>
       )}
 
-      {/* ─── My Venues — List ─── */}
-      {view === VIEWS.MY_VENUES && !selectedVenueId && (
-        <div className={styles.section}>
-          <div className={styles.sectionHeader}>
-            <h3 className={styles.sectionTitle}>Your Tracked Venues</h3>
-            <span className={styles.trackedCount}>{mergedVenues.length} / 200</span>
-          </div>
-          {mergedVenues.length === 0 ? (
-            <div className={styles.empty}>
-              <p>No venues tracked yet.</p>
-              <p className={styles.emptyHint}>
-                Tap <strong>Browse</strong> to find venues and add them to your list, or use the <strong>Calculator</strong> / <strong>AI Scan</strong> to log sessions.
-              </p>
-            </div>
-          ) : (
-            <div className={styles.venueList}>
-              {mergedVenues.map(v => (
-                <div key={v.venueId} className={styles.venueCardWrap}>
-                  <button
-                    className={styles.venueCard}
-                    onClick={() => handleSelectVenue(v.venueId)}
-                  >
-                    <div className={styles.venueCardTop}>
-                      <span className={styles.venueName}>{v.venueName}</span>
-                      <span className={styles.venueSuburb}>{v.suburb}{v.region ? ` · ${v.region}` : ''}</span>
-                    </div>
-                    <div className={styles.venueCardStats}>
-                      {v.hasData ? (
-                        <>
-                          <span>🎰 {v.machineCount} machines</span>
-                          <span>📊 {v.sessionCount} sessions</span>
-                          <span className={styles.timeAgo}>{timeAgo(v.lastActivity)}</span>
-                        </>
-                      ) : (
-                        <span className={styles.noData}>No session data yet</span>
-                      )}
-                    </div>
-                  </button>
-                  {v.isUserTracked && (
-                    <button
-                      className={styles.untrackBtn}
-                      onClick={(e) => { e.stopPropagation(); handleUntrackVenue(v.venueId) }}
-                      title="Remove from tracked list"
-                    >
-                      ✕
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+      {/* ─── Manage tracked venues (My Venues / Browse / Add) ─── */}
+      {view === VIEWS.MANAGE && !selectedVenueId && (
+        <TrackedVenueList onSelectVenue={handleSelectVenue} />
       )}
 
-      {/* ─── My Venues — Venue Detail ─── */}
-      {view === VIEWS.MY_VENUES && selectedVenueId && !selectedMachine && venueAnalytics && (
+      {/* ─── Venue Detail ─── */}
+      {view === VIEWS.MANAGE && selectedVenueId && !selectedMachine && venueAnalytics && (
         <VenueDetail
           venueId={selectedVenueId}
           analytics={venueAnalytics}
@@ -273,8 +144,21 @@ export default function VenueInsights({ activeVenue, onSetActiveVenue }) {
         />
       )}
 
-      {/* ─── My Venues — Machine Detail ─── */}
-      {view === VIEWS.MY_VENUES && selectedVenueId && selectedMachine && machineGraphData && (
+      {/* ─── Venue Detail fallback when analytics missing (e.g. user-tracked venue with no sessions) ─── */}
+      {view === VIEWS.MANAGE && selectedVenueId && !selectedMachine && !venueAnalytics && (
+        <div className={styles.section}>
+          <button className={styles.backBtn} onClick={() => { setSelectedVenueId(null); reload() }}>← Back to venues</button>
+          <div className={styles.empty}>
+            <p>No session data for this venue yet.</p>
+            <p className={styles.emptyHint}>
+              Use the <strong>Calculator</strong> or <strong>AI Scan</strong> tabs to log a session at this venue.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* ─── Machine Detail ─── */}
+      {view === VIEWS.MANAGE && selectedVenueId && selectedMachine && machineGraphData && (
         <MachineDetail
           venueId={selectedVenueId}
           machineCode={selectedMachine}
@@ -283,90 +167,6 @@ export default function VenueInsights({ activeVenue, onSetActiveVenue }) {
           getMachineName={getMachineName}
           onBack={() => setSelectedMachine(null)}
         />
-      )}
-
-      {/* ─── Browse Venues ─── */}
-      {view === VIEWS.BROWSE && (
-        <div className={styles.section}>
-          <div className={styles.sectionHeader}>
-            <h3 className={styles.sectionTitle}>Browse QLD Venues</h3>
-            <span className={styles.trackedCount}>Tracked: {getTrackedCount()} / 200</span>
-          </div>
-
-          <input
-            type="text"
-            className={styles.searchInput}
-            placeholder="Search by venue, suburb, or region..."
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-          />
-
-          {searchResults.length > 0 && (
-            <div className={styles.searchResults}>
-              {searchResults.map(v => {
-                const tracked = isVenueTracked(v.id)
-                return (
-                  <div key={v.id} className={styles.browseCardWrap}>
-                    <button
-                      className={styles.browseVenueCard}
-                      onClick={() => handleSelectVenue(v.id)}
-                    >
-                      <span className={styles.venueName}>{v.name}</span>
-                      <span className={styles.venueSuburb}>{v.suburb} · {v.region}</span>
-                    </button>
-                    <button
-                      className={tracked ? styles.trackBtnActive : styles.trackBtn}
-                      onClick={() => tracked ? handleUntrackVenue(v.id) : handleTrackVenue(v)}
-                    >
-                      {tracked ? '★' : '☆'}
-                    </button>
-                  </div>
-                )
-              })}
-            </div>
-          )}
-
-          {searchQuery.length < 2 && (
-            <>
-              <div className={styles.regionGrid}>
-                {regions.map(r => (
-                  <button
-                    key={r}
-                    className={`${styles.regionBtn} ${browseRegion === r ? styles.regionActive : ''}`}
-                    onClick={() => setBrowseRegion(browseRegion === r ? null : r)}
-                  >
-                    {r}
-                  </button>
-                ))}
-              </div>
-
-              {browseRegion && browseVenues.length > 0 && (
-                <div className={styles.browseList}>
-                  {browseVenues.map(v => {
-                    const tracked = isVenueTracked(v.id)
-                    return (
-                      <div key={v.id} className={styles.browseCardWrap}>
-                        <button
-                          className={styles.browseVenueCard}
-                          onClick={() => handleSelectVenue(v.id)}
-                        >
-                          <span className={styles.venueName}>{v.name}</span>
-                          <span className={styles.venueSuburb}>{v.suburb} · {v.type}</span>
-                        </button>
-                        <button
-                          className={tracked ? styles.trackBtnActive : styles.trackBtn}
-                          onClick={() => tracked ? handleUntrackVenue(v.id) : handleTrackVenue(v)}
-                        >
-                          {tracked ? '★' : '☆'}
-                        </button>
-                      </div>
-                    )
-                  })}
-                </div>
-              )}
-            </>
-          )}
-        </div>
       )}
 
       {/* ─── Activity Feed ─── */}
@@ -400,37 +200,6 @@ export default function VenueInsights({ activeVenue, onSetActiveVenue }) {
               ))}
             </div>
           )}
-        </div>
-      )}
-
-      {/* ─── Add Custom Venue ─── */}
-      {view === VIEWS.ADD && (
-        <div className={styles.section}>
-          <h3 className={styles.sectionTitle}>Add Custom Venue</h3>
-          <form className={styles.addForm} onSubmit={handleAddVenue}>
-            <input
-              className={styles.formInput}
-              placeholder="Venue name *"
-              value={addForm.name}
-              onChange={e => setAddForm({ ...addForm, name: e.target.value })}
-              required
-            />
-            <input
-              className={styles.formInput}
-              placeholder="Suburb"
-              value={addForm.suburb}
-              onChange={e => setAddForm({ ...addForm, suburb: e.target.value })}
-            />
-            <input
-              className={styles.formInput}
-              placeholder="Region"
-              value={addForm.region}
-              onChange={e => setAddForm({ ...addForm, region: e.target.value })}
-            />
-            <button type="submit" className={styles.submitBtn}>
-              Add Venue
-            </button>
-          </form>
         </div>
       )}
     </div>
