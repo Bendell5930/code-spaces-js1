@@ -13,6 +13,7 @@ import StayOrGoMeter from './StayOrGoMeter'
 import MateMode from './MateMode'
 import VenueFinderMap from './VenueFinderMap'
 import PushNotifications from './PushNotifications'
+import TrackedVenueList from './TrackedVenueList'
 import { playTap } from '../lib/sounds'
 import styles from './ViralHub.module.css'
 
@@ -26,6 +27,7 @@ const GROUPS = [
 const FEATURES = {
   social: [
     { key: 'checkin', label: '📍 Check-In' },
+    { key: 'venues', label: '📌 My Venues' },
     { key: 'tips', label: '🔥 Hot Tips' },
     { key: 'reviews', label: '⭐ Reviews' },
     { key: 'mate', label: '🤝 Mate Mode' },
@@ -98,6 +100,7 @@ export default function ViralHub({ spins }) {
       {/* Content */}
       <div className={styles.content}>
         {feature === 'checkin' && <VenueCheckIn />}
+        {feature === 'venues' && <TrackedVenueList />}
         {feature === 'tips' && <HotTipFeed />}
         {feature === 'reviews' && <VenueRatings />}
         {feature === 'mate' && <MateMode />}
