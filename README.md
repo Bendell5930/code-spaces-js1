@@ -91,15 +91,17 @@ Reload the app. The server will re-check Stripe on every load, so locks reappear
 
 ## Payment flow (architecture)
 
-1. User clicks **Upgrade to Premium** → `POST /api/checkout` creates a Stripe Checkout Session (`mode: "subscription"`, `client_reference_id` set to the user identifier, `allow_promotion_codes: true`).
-2. Browser navigates to the Stripe-hosted checkout page.
-3. After payment, Stripe fires webhooks (`checkout.session.completed`, `invoice.paid`) → `/api/stripe/webhook` persists subscription state in the server-side store and logs everything.
-4. Stripe redirects to `/?checkout=success&session_id=SESSION_ID`.
-5. The app calls `POST /api/verify-session` to confirm the session and retrieve `customerId` + subscription data.
-6. `customerId` is stored in `localStorage`; the plan state is set to Premium.
-7. If the webhook is still in-flight, the client polls `/api/me/subscription` for up to 10 seconds.
-8. On every subsequent app load, `GET /api/me/subscription?customerId=cus_xxx` is called — this checks the server-side cache first, then falls back to querying Stripe directly. The result is always authoritative.
-9. **Manage billing** button (visible when subscribed) → `POST /api/billing-portal` → Stripe Customer Portal for cancellations/upgrades.
+1. **First visit** the user is shown the `<SignUpGate>` (see `components/SignUpGate.js`). It collects **Name + Email** and a **"Remember me on this device"** checkbox. The profile is persisted via `lib/profileStore.js` — to `localStorage` when remembered, otherwise only to `sessionStorage` (forgotten when the tab closes). Only the name and email are stored, and only to verify the monthly Stripe subscription.
+2. User clicks **Continue to Payment** → `POST /api/checkout` creates a Stripe Checkout Session (`mode: "subscription"`, `client_reference_id` set to the user identifier, `customer_email` pre-filled from the sign-up form, `allow_promotion_codes: true`).
+3. Browser navigates to the Stripe-hosted checkout page.
+4. After payment, Stripe fires webhooks (`checkout.session.completed`, `invoice.paid`) → `/api/stripe/webhook` persists subscription state in the server-side store and logs everything.
+5. Stripe redirects to `/?checkout=success&session_id=SESSION_ID`.
+6. The app calls `POST /api/verify-session` to confirm the session and retrieve `customerId` + subscription data.
+7. `customerId` is stored in `localStorage`; the plan state is set to Premium.
+8. If the webhook is still in-flight, the client polls `/api/me/subscription` for up to 10 seconds.
+9. On every subsequent app load, `GET /api/me/subscription?customerId=cus_xxx` is called — this checks the server-side cache first, then falls back to querying Stripe directly. The result is always authoritative. **Active = no locks; lapsed = locks reappear until the user re-subscribes.**
+10. **Manage billing** button (visible when subscribed) → `POST /api/billing-portal` → Stripe Customer Portal for cancellations/upgrades.
+11. **Sign out** clears the local profile (and subscription cache) but does *not* cancel the Stripe subscription — signing back in with the same email re-links the same Stripe customer and unlocks Premium automatically.
 
 ## Running tests
 
