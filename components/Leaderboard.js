@@ -67,7 +67,7 @@ export default function Leaderboard({ spins }) {
   }
 
   function handleJumpToMe() {
-    if (myPage == null) return
+    if (myPage === null) return
     if (myPage !== currentPage) setPage(myPage)
     setPendingScroll(true)
     playTap()
@@ -82,7 +82,7 @@ export default function Leaderboard({ spins }) {
   ]
 
   const showJumpChip =
-    myIndex >= 0 && myPage != null && myPage !== currentPage
+    myIndex >= 0 && myPage !== null && myPage !== currentPage
 
   const jumpChip = showJumpChip ? (
     <button
