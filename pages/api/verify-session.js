@@ -27,15 +27,26 @@ export default async function handler(req, res) {
       expand: ['subscription'],
     })
 
-    if (session.payment_status !== 'paid' && session.status !== 'complete') {
-      return res.status(200).json({ active: false, status: 'incomplete' })
-    }
-
     const sub = session.subscription
+    const subStatus = sub?.status || null
+
+    // Determine "active" from the subscription itself when available, falling
+    // back to the session payment_status. This matters because Stripe sometimes
+    // returns the session as paid but the subscription is still in
+    // "incomplete" state for a few seconds while it finalizes — we must still
+    // hand the customerId back to the client so it can poll/persist the link.
+    const subActive = ['active', 'trialing'].includes(subStatus)
+    const sessionPaid =
+      session.payment_status === 'paid' || session.status === 'complete'
+    const active = subActive || (sessionPaid && !subStatus)
+
+    // ALWAYS return the customerId (and any subscription details) when known,
+    // even if `active` is still false. The client persists the customerId so
+    // it can poll /api/me/subscription and recover on subsequent visits.
     return res.status(200).json({
-      active: true,
-      status: sub?.status || 'active',
-      customerId: session.customer,
+      active,
+      status: subStatus || (sessionPaid ? 'active' : 'incomplete'),
+      customerId: session.customer || null,
       subscriptionId: sub?.id || null,
       currentPeriodEnd: sub?.current_period_end || null,
     })

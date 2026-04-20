@@ -106,12 +106,20 @@ export default function Home() {
           setPlan(sub.plan)
           playSuccess()
           showToast('🎉 Subscription active! All features are now unlocked.')
-        } else if (sub.customerId) {
-          // Webhook may be in-flight — poll for up to 10 seconds
-          const data = await pollUntilActive(sub.customerId)
+          return
+        }
+
+        // Not yet active. handleCheckoutReturn has persisted the customerId
+        // (when known) — re-read the cache so we can poll the server-side
+        // endpoint until the subscription finalises (Stripe sometimes lags
+        // behind the redirect by a few seconds, and the webhook may also
+        // need to fire).
+        const customerId = sub.customerId || loadSubscription().customerId
+        if (customerId) {
+          const data = await pollUntilActive(customerId)
           if (data) {
             const unlocked = applyPremiumUnlock({
-              customerId: sub.customerId,
+              customerId,
               subscriptionId: data.subscriptionId,
               currentPeriodEnd: data.currentPeriodEnd,
               status: data.status,
@@ -120,7 +128,9 @@ export default function Home() {
             playSuccess()
             showToast('🎉 Subscription active! All features are now unlocked.')
           } else {
-            showToast('Payment processing — please refresh in a few seconds if features remain locked.')
+            // Customer link is saved — a refresh will re-verify and unlock
+            // automatically once Stripe finalises.
+            showToast('Payment processing — your account will unlock automatically. Refresh in a few seconds if it stays locked.')
           }
         } else {
           showToast('Payment could not be verified yet. Please refresh or contact support.')
