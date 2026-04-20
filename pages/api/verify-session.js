@@ -47,6 +47,7 @@ export default async function handler(req, res) {
       active,
       status: subStatus || (sessionPaid ? 'active' : 'incomplete'),
       customerId: session.customer || null,
+      customerEmail: session.customer_details?.email || session.customer_email || null,
       subscriptionId: sub?.id || null,
       currentPeriodEnd: sub?.current_period_end || null,
     })

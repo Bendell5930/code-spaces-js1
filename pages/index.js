@@ -11,9 +11,11 @@ import HarmMinimization from '../components/HarmMinimization'
 import PokieCalculator from '../components/PokieCalculator'
 import VenueInsights from '../components/VenueInsights'
 import ViralHub from '../components/ViralHub'
+import SignUpGate from '../components/SignUpGate'
 import { recordSessionSpin } from '../lib/sessionManager'
 import { canAccessTab, FEATURES, PLANS, BASIC_HISTORY_LIMIT } from '../lib/featureGates'
 import { loadSubscription, verifySubscription, applyPremiumUnlock, handleCheckoutReturn, openCustomerPortal } from '../lib/subscriptionStore'
+import { loadProfile, saveProfile, clearProfile } from '../lib/profileStore'
 import { resumeAudio, playTap, playSwitch, playSuccess, playCoin, playWarn } from '../lib/sounds'
 import styles from '../styles/home.module.css'
 
@@ -41,6 +43,8 @@ export default function Home() {
   const [paywallFeature, setPaywallFeature] = useState(null)
   const [activeVenue, setActiveVenue] = useState(null)
   const [toast, setToast] = useState(null)
+  const [profile, setProfile] = useState(null)
+  const [profileLoaded, setProfileLoaded] = useState(false)
   const spinCallbackRef = useRef(null)
   const calculatorRef = useRef(null)
   const [, forceUpdate] = useState(0)
@@ -75,6 +79,11 @@ export default function Home() {
   useEffect(() => {
     setSpins(loadSpins())
 
+    // Load saved sign-up profile (if any). The gate uses this to decide
+    // whether to render itself.
+    setProfile(loadProfile())
+    setProfileLoaded(true)
+
     // Load saved active venue
     try {
       const v = localStorage.getItem('pokie-active-venue')
@@ -102,6 +111,22 @@ export default function Home() {
 
       // First: verify the session directly with Stripe (doesn't depend on webhook)
       handleCheckoutReturn(sessionId).then(async (sub) => {
+        // If the verified Stripe session reported an email and our local
+        // profile is missing one, persist it so the gate doesn't re-appear
+        // next visit (e.g. when the user paid via Stripe before completing
+        // the in-app sign-up form).
+        try {
+          const existing = loadProfile()
+          if (sub.customerEmail && (!existing || !existing.email)) {
+            const saved = saveProfile({
+              name: existing?.name || '',
+              email: sub.customerEmail,
+              remember: true,
+            })
+            setProfile(saved)
+          }
+        } catch { /* ignore */ }
+
         if (sub.plan === PLANS.PREMIUM) {
           setPlan(sub.plan)
           playSuccess()
@@ -225,6 +250,26 @@ export default function Home() {
     spinCallbackRef.current = cb
   }, [])
 
+  function handleSignOut() {
+    clearProfile()
+    setProfile(null)
+    showToast('Signed out. Your subscription on Stripe is unaffected.')
+  }
+
+  function handleProfileSaved(p) {
+    setProfile(p)
+  }
+
+  // Render the sign-up gate when the visitor has no remembered profile
+  // and isn't already on Premium. Premium users (e.g. returning subscribers
+  // whose customerId is cached) skip the gate entirely.
+  const showSignUpGate =
+    profileLoaded && !profile && plan !== PLANS.PREMIUM
+
+  if (showSignUpGate) {
+    return <SignUpGate onProfileSaved={handleProfileSaved} />
+  }
+
   // Read live calculator session data so stat cards mirror session stats exactly
   const calcSession = calculatorRef.current?.getSessionData?.() || null
   const totalWins = calcSession ? calcSession.totalOut : spins.reduce((sum, s) => sum + (s.winAmount || 0), 0)
@@ -259,6 +304,19 @@ export default function Home() {
               }}
             >
               Manage billing
+            </button>
+          )}
+          {profile && (
+            <button
+              onClick={handleSignOut}
+              title={`Signed in as ${profile.email}`}
+              style={{
+                marginLeft: 8, padding: '4px 12px', fontSize: 12,
+                background: 'transparent', color: '#94a3b8',
+                border: '1px solid #334155', borderRadius: 6, cursor: 'pointer',
+              }}
+            >
+              Sign out
             </button>
           )}
         </div>
