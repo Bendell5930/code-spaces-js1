@@ -12,6 +12,8 @@ import {
   QLD_VENUES, getAllVenues, getVenueMachines,
 } from '../data/qldVenues'
 import TrackedVenueList from './TrackedVenueList'
+import Pagination from './Pagination'
+import { totalPagesFor, clampPage } from '../lib/pagination'
 import styles from './VenueInsights.module.css'
 
 // ─── Constants ───
@@ -377,6 +379,22 @@ function MachineDetail({ venueId, machineCode, graphData, showLegend, getMachine
   const { wetDryTrend, winBreakdown, sessionHistory } = graphData
   const displayName = getMachineName(venueId, machineCode)
 
+  const SESSIONS_PAGE_SIZE = 15
+  const [sessionPage, setSessionPage] = useState(1)
+
+  // Reset to page 1 whenever the underlying session list changes.
+  useEffect(() => {
+    setSessionPage(1)
+  }, [sessionHistory.length])
+
+  const totalSessionPages = totalPagesFor(sessionHistory.length, SESSIONS_PAGE_SIZE)
+  const currentSessionPage = clampPage(sessionPage, totalSessionPages)
+  const sessionStart = (currentSessionPage - 1) * SESSIONS_PAGE_SIZE
+  const pagedSessions = sessionHistory.slice(
+    sessionStart,
+    sessionStart + SESSIONS_PAGE_SIZE
+  )
+
   return (
     <div className={styles.section}>
       <button className={styles.backBtn} onClick={onBack}>← Back to machines</button>
@@ -446,8 +464,8 @@ function MachineDetail({ venueId, machineCode, graphData, showLegend, getMachine
                   </tr>
                 </thead>
                 <tbody>
-                  {sessionHistory.map((s, i) => (
-                    <tr key={i}>
+                  {pagedSessions.map((s, i) => (
+                    <tr key={sessionStart + i}>
                       <td>{s.date}</td>
                       <td>{s.profile}</td>
                       <td>{s.spins}</td>
@@ -468,6 +486,16 @@ function MachineDetail({ venueId, machineCode, graphData, showLegend, getMachine
                 </tbody>
               </table>
             </div>
+            {totalSessionPages > 1 && (
+              <div className={styles.paginationRow}>
+                <Pagination
+                  page={currentSessionPage}
+                  totalPages={totalSessionPages}
+                  onChange={setSessionPage}
+                  label="Session history pagination"
+                />
+              </div>
+            )}
           </div>
 
           {/* Win Category Summary */}
