@@ -365,6 +365,10 @@
   -webkit-overflow-scrolling: touch;
 }
 
+.paginationRow {
+  margin-top: 10px;
+}
+
 .table {
   width: 100%;
   border-collapse: collapse;

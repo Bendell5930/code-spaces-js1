@@ -1,3 +1,4 @@
+import { useEffect, useMemo, useState } from 'react'
 import {
   BarChart,
   Bar,
@@ -7,9 +8,30 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from 'recharts'
+import Pagination from './Pagination'
+import { totalPagesFor, clampPage } from '../lib/pagination'
 import styles from './SpinHistory.module.css'
 
+const RECENT_SPINS_PAGE_SIZE = 20
+
 export default function SpinHistory({ spins }) {
+  const [recentPage, setRecentPage] = useState(1)
+
+  // Newest-first list of all logged spins (bounded only by what's stored).
+  const recentSpins = useMemo(() => [...spins].reverse(), [spins])
+  const totalRecentPages = totalPagesFor(recentSpins.length, RECENT_SPINS_PAGE_SIZE)
+  const currentRecentPage = clampPage(recentPage, totalRecentPages)
+  const recentStart = (currentRecentPage - 1) * RECENT_SPINS_PAGE_SIZE
+  const pagedRecent = recentSpins.slice(
+    recentStart,
+    recentStart + RECENT_SPINS_PAGE_SIZE
+  )
+
+  // Reset to page 1 when the underlying data changes size.
+  useEffect(() => {
+    setRecentPage(1)
+  }, [recentSpins.length])
+
   // Build win-cluster data: group wins into buckets
   const winBuckets = {}
   const bonusGaps = []
@@ -86,12 +108,11 @@ export default function SpinHistory({ spins }) {
               </tr>
             </thead>
             <tbody>
-              {spins
-                .slice(-20)
-                .reverse()
-                .map((s, i) => (
-                  <tr key={s.timestamp || i}>
-                    <td>{spins.length - i}</td>
+              {pagedRecent.map((s, i) => {
+                const absoluteIndex = recentStart + i
+                return (
+                  <tr key={s.timestamp || absoluteIndex}>
+                    <td>{spins.length - absoluteIndex}</td>
                     <td>{s.machineName || '—'}</td>
                     <td>${s.betAmount ?? '—'}</td>
                     <td
@@ -103,10 +124,21 @@ export default function SpinHistory({ spins }) {
                     </td>
                     <td>{s.bonusHit ? '✓' : ''}</td>
                   </tr>
-                ))}
+                )
+              })}
             </tbody>
           </table>
         </div>
+        {totalRecentPages > 1 && (
+          <div className={styles.paginationRow}>
+            <Pagination
+              page={currentRecentPage}
+              totalPages={totalRecentPages}
+              onChange={setRecentPage}
+              label="Recent spins pagination"
+            />
+          </div>
+        )}
       </div>
 
       {/* Win Clusters chart */}
