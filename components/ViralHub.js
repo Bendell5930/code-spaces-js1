@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import VenueCheckIn from './VenueCheckIn'
 import ChallengeAMate from './ChallengeAMate'
 import DailyStreaks from './DailyStreaks'
@@ -53,6 +53,17 @@ const FEATURES = {
 export default function ViralHub({ spins }) {
   const [group, setGroup] = useState('social')
   const [feature, setFeature] = useState('checkin')
+  const [activeVenue, setActiveVenue] = useState(null)
+
+  // Load any previously-selected active venue so the Check-In form is
+  // pre-populated when the user opens the hub.
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    try {
+      const v = localStorage.getItem('pokie-active-venue')
+      if (v) setActiveVenue(JSON.parse(v))
+    } catch { /* ignore unavailable/corrupt localStorage */ }
+  }, [])
 
   function switchGroup(g) {
     if (g !== group) {
@@ -67,6 +78,20 @@ export default function ViralHub({ spins }) {
       playTap()
       setFeature(f)
     }
+  }
+
+  // Selecting a venue in the Finder automatically sets it as the active
+  // venue and jumps to the Check-In sub-tab so the user can check in
+  // straight away without having to re-pick the venue elsewhere.
+  function handleSelectVenueFromFinder(venue) {
+    if (!venue) return
+    setActiveVenue(venue)
+    try {
+      localStorage.setItem('pokie-active-venue', JSON.stringify(venue))
+    } catch { /* ignore localStorage write failures (quota / private mode) */ }
+    playTap()
+    setGroup('social')
+    setFeature('checkin')
   }
 
   return (
@@ -99,7 +124,7 @@ export default function ViralHub({ spins }) {
 
       {/* Content */}
       <div className={styles.content}>
-        {feature === 'checkin' && <VenueCheckIn />}
+        {feature === 'checkin' && <VenueCheckIn activeVenue={activeVenue} />}
         {feature === 'venues' && <TrackedVenueList />}
         {feature === 'tips' && <HotTipFeed />}
         {feature === 'reviews' && <VenueRatings />}
@@ -112,7 +137,9 @@ export default function ViralHub({ spins }) {
         {feature === 'staygo' && <StayOrGoMeter />}
         {feature === 'achieve' && <AchievementWall spins={spins} />}
         {feature === 'diary' && <LuckyMachineDiary />}
-        {feature === 'finder' && <VenueFinderMap />}
+        {feature === 'finder' && (
+          <VenueFinderMap onSelectVenue={handleSelectVenueFromFinder} />
+        )}
         {feature === 'notify' && <PushNotifications />}
       </div>
     </div>
