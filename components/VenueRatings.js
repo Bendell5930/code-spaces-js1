@@ -4,6 +4,7 @@ import {
   markReviewHelpful, REVIEW_CATEGORIES,
 } from '../lib/viralStore'
 import { playTap, playSuccess } from '../lib/sounds'
+import VenuePicker from './VenuePicker'
 
 function StarRating({ value, onChange, size = 20 }) {
   return (
@@ -32,7 +33,7 @@ function timeAgo(ts) {
   return `${Math.floor(mins / 1440)}d ago`
 }
 
-export default function VenueRatings({ activeVenue }) {
+export default function VenueRatings({ activeVenue, onSelectVenue }) {
   const [reviews, setReviews] = useState([])
   const [average, setAverage] = useState({ overall: 0, count: 0, categories: {} })
   const [showForm, setShowForm] = useState(false)
@@ -43,7 +44,15 @@ export default function VenueRatings({ activeVenue }) {
     if (activeVenue?.name) {
       setReviews(getVenueReviews(activeVenue.name))
       setAverage(getVenueAverageRating(activeVenue.name))
+    } else {
+      setReviews([])
+      setAverage({ overall: 0, count: 0, categories: {} })
+      setShowForm(false)
     }
+    // Reset draft when switching venues so a comment for one venue
+    // doesn't leak into another.
+    setRatings({})
+    setComment('')
   }, [activeVenue])
 
   function handleSubmit(e) {
@@ -69,13 +78,25 @@ export default function VenueRatings({ activeVenue }) {
 
   if (!activeVenue) {
     return (
-      <div style={cardStyle}>
-        <p style={{ color: '#94a3b8', textAlign: 'center', margin: 0 }}>
-          📍 Select a venue from the Venues tab to see and leave reviews.
-        </p>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+        <div style={{ ...cardStyle, background: 'linear-gradient(135deg, #2d1a00, #1e293b)' }}>
+          <h3 style={{ margin: 0, color: '#fbbf24', fontSize: '1rem' }}>
+            ⭐ Venue Reviews
+          </h3>
+          <p style={{ color: '#94a3b8', margin: '0.25rem 0 0.5rem', fontSize: '0.8rem' }}>
+            Pick a venue to see ratings or leave your own short review.
+          </p>
+          <VenuePicker
+            activeVenue={null}
+            onSelect={onSelectVenue}
+            label="Pick a venue to review"
+          />
+        </div>
       </div>
     )
   }
+
+  const hasRating = Object.values(ratings).some(v => v > 0)
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
@@ -123,6 +144,18 @@ export default function VenueRatings({ activeVenue }) {
         >
           {showForm ? '✕ Cancel' : '✍️ Write Review'}
         </button>
+
+        {/* Compact picker so the user can swap venues without leaving Reviews. */}
+        {onSelectVenue && (
+          <div style={{ marginTop: '0.6rem' }}>
+            <VenuePicker
+              activeVenue={activeVenue}
+              onSelect={onSelectVenue}
+              onClear={() => onSelectVenue(null)}
+              compact
+            />
+          </div>
+        )}
       </div>
 
       {/* Review form */}
@@ -140,14 +173,32 @@ export default function VenueRatings({ activeVenue }) {
           <textarea
             value={comment}
             onChange={e => setComment(e.target.value)}
-            placeholder="Optional comment (max 300 chars)..."
+            placeholder="Optional short message about the venue (max 300 chars)…"
             maxLength={300}
             rows={3}
             style={inputStyle}
           />
-          <button type="submit" style={{ ...btnStyle, background: '#22c55e', opacity: Object.values(ratings).some(v => v > 0) ? 1 : 0.4 }}>
+          <div style={{ color: '#64748b', fontSize: '0.7rem', textAlign: 'right' }}>
+            {comment.length}/300
+          </div>
+          <button
+            type="submit"
+            disabled={!hasRating}
+            style={{
+              ...btnStyle,
+              background: hasRating ? '#22c55e' : '#334155',
+              color: hasRating ? '#0f172a' : '#94a3b8',
+              cursor: hasRating ? 'pointer' : 'not-allowed',
+              opacity: hasRating ? 1 : 0.7,
+            }}
+          >
             ✅ Submit Review
           </button>
+          {!hasRating && (
+            <p style={{ color: '#64748b', fontSize: '0.7rem', margin: '0.2rem 0 0', textAlign: 'center' }}>
+              Tap at least one star to enable submit.
+            </p>
+          )}
         </form>
       )}
 

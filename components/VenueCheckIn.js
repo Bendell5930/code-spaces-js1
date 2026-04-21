@@ -3,8 +3,9 @@ import {
   checkIn, checkOut, getActiveCheckIns, getMyActiveCheckIn, STATUS_OPTIONS,
 } from '../lib/viralStore'
 import { playTap, playSuccess } from '../lib/sounds'
+import VenuePicker from './VenuePicker'
 
-export default function VenueCheckIn({ activeVenue }) {
+export default function VenueCheckIn({ activeVenue, onSelectVenue }) {
   const [myCheckIn, setMyCheckIn] = useState(null)
   const [allCheckIns, setAllCheckIns] = useState([])
   const [status, setStatus] = useState('casual')
@@ -80,19 +81,23 @@ export default function VenueCheckIn({ activeVenue }) {
             📍 Check In at a Venue
           </div>
 
+          {/* Inline venue picker — pick once and the same venue is reused
+              for Reviews and other social tabs (shared via ViralHub). */}
+          <div style={{ marginBottom: '0.6rem' }}>
+            <VenuePicker
+              activeVenue={activeVenue}
+              onSelect={onSelectVenue}
+              onClear={onSelectVenue ? () => onSelectVenue(null) : undefined}
+              label="Pick the venue you're at"
+            />
+          </div>
+
           {!activeVenue ? (
             <p style={{ color: '#64748b', fontSize: '0.8rem', margin: 0 }}>
-              Select a venue from the Venues tab first to check in.
+              Pick a venue above to check in.
             </p>
           ) : (
             <>
-              <div style={{ color: '#f1f5f9', fontWeight: 600, marginBottom: '0.5rem' }}>
-                {activeVenue.name}
-                {activeVenue.suburb && (
-                  <span style={{ color: '#64748b', fontWeight: 400 }}> · {activeVenue.suburb}</span>
-                )}
-              </div>
-
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginBottom: '0.5rem' }}>
                 {STATUS_OPTIONS.map(opt => (
                   <button key={opt.key} onClick={() => { setStatus(opt.key); playTap() }} style={{

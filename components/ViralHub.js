@@ -80,15 +80,26 @@ export default function ViralHub({ spins }) {
     }
   }
 
+  // Persist the active venue to localStorage so it survives reloads and
+  // is shared across every social tab (Check-In, Reviews, etc.).
+  function persistActiveVenue(venue) {
+    setActiveVenue(venue)
+    if (typeof window === 'undefined') return
+    try {
+      if (venue) {
+        localStorage.setItem('pokie-active-venue', JSON.stringify(venue))
+      } else {
+        localStorage.removeItem('pokie-active-venue')
+      }
+    } catch { /* ignore localStorage write failures (quota / private mode) */ }
+  }
+
   // Selecting a venue in the Finder automatically sets it as the active
   // venue and jumps to the Check-In sub-tab so the user can check in
   // straight away without having to re-pick the venue elsewhere.
   function handleSelectVenueFromFinder(venue) {
     if (!venue) return
-    setActiveVenue(venue)
-    try {
-      localStorage.setItem('pokie-active-venue', JSON.stringify(venue))
-    } catch { /* ignore localStorage write failures (quota / private mode) */ }
+    persistActiveVenue(venue)
     playTap()
     setGroup('social')
     setFeature('checkin')
@@ -124,10 +135,20 @@ export default function ViralHub({ spins }) {
 
       {/* Content */}
       <div className={styles.content}>
-        {feature === 'checkin' && <VenueCheckIn activeVenue={activeVenue} />}
+        {feature === 'checkin' && (
+          <VenueCheckIn
+            activeVenue={activeVenue}
+            onSelectVenue={persistActiveVenue}
+          />
+        )}
         {feature === 'venues' && <TrackedVenueList />}
         {feature === 'tips' && <HotTipFeed />}
-        {feature === 'reviews' && <VenueRatings />}
+        {feature === 'reviews' && (
+          <VenueRatings
+            activeVenue={activeVenue}
+            onSelectVenue={persistActiveVenue}
+          />
+        )}
         {feature === 'mate' && <MateMode />}
         {feature === 'bingo' && <PokieBingo />}
         {feature === 'challenge' && <ChallengeAMate />}
