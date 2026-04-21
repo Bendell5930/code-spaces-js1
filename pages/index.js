@@ -16,6 +16,7 @@ import { recordSessionSpin } from '../lib/sessionManager'
 import { canAccessTab, FEATURES, PLANS, BASIC_HISTORY_LIMIT } from '../lib/featureGates'
 import { loadSubscription, verifySubscription, applyPremiumUnlock, handleCheckoutReturn, openCustomerPortal } from '../lib/subscriptionStore'
 import { loadProfile, saveProfile, clearProfile } from '../lib/profileStore'
+import { evaluateBingoFromSpin } from '../lib/viralStore'
 import { resumeAudio, playTap, playSwitch, playSuccess, playCoin, playWarn } from '../lib/sounds'
 import styles from '../styles/home.module.css'
 
@@ -209,6 +210,23 @@ export default function Home() {
     if (spinCallbackRef.current) {
       spinCallbackRef.current(spin.betAmount || 0, spin.winAmount || 0)
     }
+    // Auto-detect & fill Pokie Bingo tasks from this spin (AI scan or manual)
+    try {
+      const calc = calculatorRef.current?.getSessionData?.() || {}
+      const completed = evaluateBingoFromSpin(
+        { ...spin, venueName: spin.venueName || activeVenue?.name },
+        {
+          activeVenueName: activeVenue?.name || spin.location || null,
+          sessionTotalBet: calc.totalWagered || 0,
+          sessionTotalWon: calc.totalOut || 0,
+        }
+      )
+      if (completed && completed.length > 0) {
+        // Show one consolidated toast (avoid stacking many)
+        const labels = completed.map(c => c.label).join(' • ')
+        showToast(`🎯 Bingo auto-filled: ${labels}`)
+      }
+    } catch { /* never let bingo break a spin */ }
     if (spin.winAmount > 0) {
       playCoin()
     } else {
