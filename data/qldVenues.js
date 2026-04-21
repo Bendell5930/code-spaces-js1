@@ -175,6 +175,163 @@ export const ALL_QLD_MACHINES = [
 
 // ─── QLD Regions ───
 
+/**
+ * Approximate lat/lon centroid for each QLD region.
+ * Used by the Venue Finder to compute distance from the user's current location
+ * when an individual venue does not declare its own coordinates. Coordinates are
+ * derived from the central suburb of each region and are accurate enough for
+ * distance-based sorting (Haversine).
+ */
+export const QLD_REGION_CENTROIDS = {
+  'Brisbane CBD':            { lat: -27.4698, lon: 153.0251 },
+  'Brisbane North':          { lat: -27.3850, lon: 153.0300 },
+  'Brisbane South':          { lat: -27.5800, lon: 153.0350 },
+  'Brisbane East':           { lat: -27.4670, lon: 153.1000 },
+  'Brisbane West':           { lat: -27.4900, lon: 152.9700 },
+  'Ipswich':                 { lat: -27.6171, lon: 152.7610 },
+  'Logan':                   { lat: -27.6390, lon: 153.1080 },
+  'Gold Coast North':        { lat: -27.9670, lon: 153.4000 },
+  'Gold Coast Central':      { lat: -28.0357, lon: 153.4300 },
+  'Gold Coast South':        { lat: -28.1700, lon: 153.5400 },
+  'Sunshine Coast':          { lat: -26.6500, lon: 153.0660 },
+  'Toowoomba':               { lat: -27.5598, lon: 151.9507 },
+  'Townsville':              { lat: -19.2589, lon: 146.8169 },
+  'Cairns':                  { lat: -16.9186, lon: 145.7781 },
+  'Mackay':                  { lat: -21.1410, lon: 149.1860 },
+  'Rockhampton':             { lat: -23.3791, lon: 150.5100 },
+  'Bundaberg':               { lat: -24.8661, lon: 152.3489 },
+  'Hervey Bay':              { lat: -25.2880, lon: 152.8260 },
+  'Gladstone':               { lat: -23.8420, lon: 151.2570 },
+  'Redcliffe / Moreton Bay': { lat: -27.2300, lon: 153.1080 },
+  'Custom':                  { lat: -23.5000, lon: 145.0000 },
+}
+
+/**
+ * Optional finer-grained suburb centroids for popular gaming suburbs.
+ * Falls back to region centroid when a suburb is not listed.
+ */
+export const QLD_SUBURB_CENTROIDS = {
+  // Brisbane CBD / North
+  'Brisbane City':    { lat: -27.4698, lon: 153.0251 },
+  'Newstead':         { lat: -27.4490, lon: 153.0440 },
+  'Caxton St':        { lat: -27.4640, lon: 153.0150 },
+  'Toowong':          { lat: -27.4850, lon: 152.9890 },
+  'Chermside':        { lat: -27.3850, lon: 153.0320 },
+  'Geebung':          { lat: -27.3650, lon: 153.0490 },
+  'Aspley':           { lat: -27.3640, lon: 153.0190 },
+  'Nundah':           { lat: -27.3970, lon: 153.0640 },
+  'Hamilton':         { lat: -27.4380, lon: 153.0710 },
+  'Bracken Ridge':    { lat: -27.3170, lon: 153.0380 },
+  'Sandgate':         { lat: -27.3210, lon: 153.0700 },
+  // Brisbane South / East / West
+  'Sunnybank':        { lat: -27.5780, lon: 153.0590 },
+  'Acacia Ridge':     { lat: -27.5860, lon: 153.0250 },
+  'Moorooka':         { lat: -27.5350, lon: 153.0220 },
+  'Rocklea':          { lat: -27.5440, lon: 153.0080 },
+  'Salisbury':        { lat: -27.5650, lon: 153.0340 },
+  'Greenbank':        { lat: -27.7180, lon: 152.9620 },
+  'Carina':           { lat: -27.4870, lon: 153.1010 },
+  'Carindale':        { lat: -27.5010, lon: 153.1030 },
+  'Bulimba':          { lat: -27.4480, lon: 153.0610 },
+  'Morningside':      { lat: -27.4660, lon: 153.0780 },
+  'Wynnum':           { lat: -27.4430, lon: 153.1640 },
+  'Manly':            { lat: -27.4520, lon: 153.1860 },
+  'Red Hill':         { lat: -27.4570, lon: 153.0050 },
+  'Kenmore':          { lat: -27.5080, lon: 152.9410 },
+  'Indooroopilly':    { lat: -27.5030, lon: 152.9730 },
+  'Bardon':           { lat: -27.4570, lon: 152.9870 },
+  'Paddington':       { lat: -27.4600, lon: 153.0050 },
+  // Ipswich / Logan
+  'Ipswich':          { lat: -27.6171, lon: 152.7610 },
+  'Karalee':          { lat: -27.5800, lon: 152.8400 },
+  'Brassall':         { lat: -27.5910, lon: 152.7440 },
+  'Goodna':           { lat: -27.6110, lon: 152.8990 },
+  'Yamanto':          { lat: -27.6510, lon: 152.7280 },
+  'Springfield':      { lat: -27.6810, lon: 152.9220 },
+  'Kingston':         { lat: -27.7060, lon: 153.1330 },
+  'Beenleigh':        { lat: -27.7150, lon: 153.2010 },
+  'Marsden':          { lat: -27.6890, lon: 153.1010 },
+  'Springwood':       { lat: -27.6110, lon: 153.1340 },
+  'Jimboomba':        { lat: -27.8330, lon: 153.0330 },
+  'Waterford':        { lat: -27.7000, lon: 153.1330 },
+  // Gold Coast
+  'Southport':        { lat: -27.9670, lon: 153.4000 },
+  'Parkwood':         { lat: -27.9460, lon: 153.3690 },
+  'Surfers Paradise': { lat: -28.0023, lon: 153.4145 },
+  'Runaway Bay':      { lat: -27.9000, lon: 153.3960 },
+  'Helensvale':       { lat: -27.9100, lon: 153.3370 },
+  'Coomera':          { lat: -27.8580, lon: 153.3090 },
+  'Broadbeach':       { lat: -28.0357, lon: 153.4300 },
+  'Mermaid Beach':    { lat: -28.0470, lon: 153.4360 },
+  'Nerang':           { lat: -27.9890, lon: 153.3340 },
+  'Robina':           { lat: -28.0790, lon: 153.3940 },
+  'Tweed Heads':      { lat: -28.1810, lon: 153.5470 },
+  'Coolangatta':      { lat: -28.1690, lon: 153.5360 },
+  'Palm Beach':       { lat: -28.1140, lon: 153.4720 },
+  'Burleigh Heads':   { lat: -28.0930, lon: 153.4480 },
+  'Currumbin':        { lat: -28.1340, lon: 153.4810 },
+  // Sunshine Coast
+  'Caloundra':        { lat: -26.8030, lon: 153.1240 },
+  'Buddina':          { lat: -26.6940, lon: 153.1320 },
+  'Maroochydore':     { lat: -26.6500, lon: 153.0960 },
+  'Noosaville':       { lat: -26.4060, lon: 153.0760 },
+  'Nambour':          { lat: -26.6260, lon: 152.9580 },
+  'Coolum Beach':     { lat: -26.5300, lon: 153.0890 },
+  'Mooloolaba':       { lat: -26.6810, lon: 153.1220 },
+  // Toowoomba
+  'Toowoomba':        { lat: -27.5598, lon: 151.9507 },
+  'Wilsonton':        { lat: -27.5470, lon: 151.9230 },
+  'Highfields':       { lat: -27.4670, lon: 151.9510 },
+  // Townsville
+  'Townsville':       { lat: -19.2589, lon: 146.8169 },
+  'Kirwan':           { lat: -19.3120, lon: 146.7240 },
+  'Aitkenvale':       { lat: -19.2940, lon: 146.7760 },
+  // Cairns
+  'Cairns City':      { lat: -16.9186, lon: 145.7781 },
+  'Parramatta Park':  { lat: -16.9270, lon: 145.7670 },
+  'Edge Hill':        { lat: -16.8970, lon: 145.7470 },
+  'Smithfield':       { lat: -16.8200, lon: 145.6850 },
+  'Cairns':           { lat: -16.9186, lon: 145.7781 },
+  'Woree':            { lat: -16.9510, lon: 145.7470 },
+  // Mackay
+  'Mackay':           { lat: -21.1410, lon: 149.1860 },
+  'Rural View':       { lat: -21.0700, lon: 149.1850 },
+  'Andergrove':       { lat: -21.1110, lon: 149.1900 },
+  // Rockhampton
+  'Rockhampton':      { lat: -23.3791, lon: 150.5100 },
+  'Frenchville':      { lat: -23.3540, lon: 150.5210 },
+  'Gracemere':        { lat: -23.4400, lon: 150.4500 },
+  // Bundaberg / Hervey Bay / Gladstone
+  'Bundaberg':        { lat: -24.8661, lon: 152.3489 },
+  'Pialba':           { lat: -25.2880, lon: 152.8260 },
+  'Scarness':         { lat: -25.2870, lon: 152.8420 },
+  'Urangan':          { lat: -25.2940, lon: 152.9070 },
+  'Gladstone':        { lat: -23.8420, lon: 151.2570 },
+  // Redcliffe / Moreton Bay
+  'Redcliffe':        { lat: -27.2300, lon: 153.1080 },
+  'Caboolture':       { lat: -27.0840, lon: 152.9510 },
+  'North Lakes':      { lat: -27.2260, lon: 153.0260 },
+  'Bongaree':         { lat: -27.0820, lon: 153.1620 },
+  'Strathpine':       { lat: -27.3030, lon: 152.9830 },
+  'Morayfield':       { lat: -27.1110, lon: 152.9510 },
+}
+
+/**
+ * Resolve approximate lat/lon for a venue. Prefers explicit coords on the
+ * venue, then a known suburb centroid, then the region centroid.
+ */
+export function getVenueCoords(venue) {
+  if (!venue) return null
+  if (typeof venue.lat === 'number' && typeof venue.lon === 'number') {
+    return { lat: venue.lat, lon: venue.lon }
+  }
+  const suburbHit = venue.suburb && QLD_SUBURB_CENTROIDS[venue.suburb]
+  if (suburbHit) return { lat: suburbHit.lat, lon: suburbHit.lon }
+  const regionHit = venue.region && QLD_REGION_CENTROIDS[venue.region]
+  if (regionHit) return { lat: regionHit.lat, lon: regionHit.lon }
+  return null
+}
+
 export const QLD_REGIONS = [
   'Brisbane CBD',
   'Brisbane North',
@@ -412,10 +569,18 @@ function saveCustomVenues(venues) {
 }
 
 /**
- * Get all venues (QLD database + user custom venues)
+ * Get all venues (QLD database + user custom venues).
+ * Each returned venue is enriched with approximate `lat`/`lon` coordinates
+ * (suburb centroid, falling back to region centroid) so distance-based
+ * features like the Venue Finder work out of the box.
  */
 export function getAllVenues() {
-  return [...QLD_VENUES, ...loadCustomVenues()]
+  const all = [...QLD_VENUES, ...loadCustomVenues()]
+  return all.map(v => {
+    if (typeof v.lat === 'number' && typeof v.lon === 'number') return v
+    const coords = getVenueCoords(v)
+    return coords ? { ...v, lat: coords.lat, lon: coords.lon } : v
+  })
 }
 
 /**

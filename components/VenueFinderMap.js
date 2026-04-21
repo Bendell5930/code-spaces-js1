@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { sortVenuesByDistance, getVenueAverageRating } from '../lib/viralStore'
+import { getAllVenues } from '../data/qldVenues'
 
 export default function VenueFinderMap({ venues, onSelectVenue }) {
   const [userPos, setUserPos] = useState(null)
@@ -7,6 +8,17 @@ export default function VenueFinderMap({ venues, onSelectVenue }) {
   const [loading, setLoading] = useState(false)
   const [filter, setFilter] = useState('')
   const [maxDist, setMaxDist] = useState(50) // km
+  const [allVenues, setAllVenues] = useState(() => (venues && venues.length ? venues : []))
+
+  // When no venues prop is supplied, source the full QLD database
+  // (plus any custom venues) so the Tools → Finder tab works standalone.
+  useEffect(() => {
+    if (venues && venues.length) {
+      setAllVenues(venues)
+    } else {
+      setAllVenues(getAllVenues())
+    }
+  }, [venues])
 
   function requestLocation() {
     if (!navigator.geolocation) {
@@ -33,11 +45,11 @@ export default function VenueFinderMap({ venues, onSelectVenue }) {
   }, [])
 
   const sortedVenues = useMemo(() => {
-    if (!venues || venues.length === 0) return []
+    if (!allVenues || allVenues.length === 0) return []
 
-    let list = venues
+    let list = allVenues
     if (userPos) {
-      list = sortVenuesByDistance(venues, userPos.lat, userPos.lon)
+      list = sortVenuesByDistance(allVenues, userPos.lat, userPos.lon)
         .filter(v => v.distance <= maxDist)
     }
 
@@ -50,8 +62,10 @@ export default function VenueFinderMap({ venues, onSelectVenue }) {
       )
     }
 
-    return list.slice(0, 30)
-  }, [venues, userPos, filter, maxDist])
+    // Cap at a generous limit so the user sees the full extensive list
+    // within their chosen radius without rendering thousands of rows.
+    return list.slice(0, 200)
+  }, [allVenues, userPos, filter, maxDist])
 
   function getHeatColor(rating) {
     if (rating >= 4) return '#22c55e'
