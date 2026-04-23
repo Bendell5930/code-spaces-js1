@@ -10,12 +10,73 @@ import {
 } from 'recharts'
 import Pagination from './Pagination'
 import { totalPagesFor, clampPage } from '../lib/pagination'
+import { generateSpinStream, summarise, DEFAULT_MODEL } from '../lib/spinSimulator'
 import styles from './SpinHistory.module.css'
 
 const RECENT_SPINS_PAGE_SIZE = 20
 
-export default function SpinHistory({ spins }) {
+export default function SpinHistory({ spins, onAddSpins }) {
   const [recentPage, setRecentPage] = useState(1)
+  const [showSim, setShowSim] = useState(false)
+  const [simForm, setSimForm] = useState({
+    count: 200,
+    seed: '',
+    machineName: 'Simulated Machine',
+    betAmount: 1,
+    denomination: 1,
+    lines: 25,
+    startingBalance: 200,
+    rtp: DEFAULT_MODEL.rtp,
+  })
+  const [simStatus, setSimStatus] = useState(null)
+  const [simError, setSimError] = useState(null)
+
+  function updateSimField(field, value) {
+    setSimForm((f) => ({ ...f, [field]: value }))
+  }
+
+  function handleGenerateSpins() {
+    setSimError(null)
+    setSimStatus(null)
+    try {
+      const count = parseInt(simForm.count, 10)
+      if (!Number.isInteger(count) || count <= 0) {
+        throw new Error('Count must be a positive integer')
+      }
+      const rtp = Number(simForm.rtp)
+      if (!(rtp > 0 && rtp < 1)) {
+        throw new Error('RTP must be between 0 and 1 (e.g. 0.90)')
+      }
+      const seedRaw = String(simForm.seed).trim()
+      const seed = seedRaw === '' ? undefined : Number(seedRaw)
+      if (seedRaw !== '' && !Number.isFinite(seed)) {
+        throw new Error('Seed must be a number (or leave blank for random)')
+      }
+      const generated = generateSpinStream({
+        count,
+        seed,
+        machineName: simForm.machineName || 'Simulated Machine',
+        bet: Number(simForm.betAmount) || 1,
+        denomination: Number(simForm.denomination) || 1,
+        lines: Number(simForm.lines) || 25,
+        startingBalance: Number(simForm.startingBalance) || 200,
+        model: { ...DEFAULT_MODEL, rtp },
+      })
+      if (typeof onAddSpins === 'function') {
+        onAddSpins(generated)
+      }
+      const stats = summarise(generated)
+      setSimStatus({
+        count: generated.length,
+        observedRtp: stats.observedRtp,
+        hitFrequency: stats.hitFrequency,
+        bonuses: Math.round(stats.bonusFrequency * generated.length),
+        biggestWin: stats.biggestWin,
+      })
+    } catch (err) {
+      setSimError(err.message || 'Failed to generate spins')
+    }
+  }
 
   // Newest-first list of all logged spins (bounded only by what's stored).
   const recentSpins = useMemo(() => [...spins].reverse(), [spins])
@@ -85,14 +146,34 @@ export default function SpinHistory({ spins }) {
 
   if (spins.length === 0) {
     return (
-      <div className={styles.empty}>
-        <p>No spins logged yet. Use the form to start recording data.</p>
+      <div className={styles.wrapper}>
+        <div className={styles.empty}>
+          <p>No spins logged yet. Use the form to start recording data.</p>
+        </div>
+        {onAddSpins && renderSimulatorPanel({
+          showSim,
+          setShowSim,
+          simForm,
+          updateSimField,
+          handleGenerateSpins,
+          simStatus,
+          simError,
+        })}
       </div>
     )
   }
 
   return (
     <div className={styles.wrapper}>
+      {onAddSpins && renderSimulatorPanel({
+        showSim,
+        setShowSim,
+        simForm,
+        updateSimField,
+        handleGenerateSpins,
+        simStatus,
+        simError,
+      })}
       {/* Recent spins table */}
       <div className={styles.section}>
         <h3 className={styles.heading}>Recent Spins</h3>
@@ -216,6 +297,140 @@ export default function SpinHistory({ spins }) {
               />
             </BarChart>
           </ResponsiveContainer>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function renderSimulatorPanel({
+  showSim,
+  setShowSim,
+  simForm,
+  updateSimField,
+  handleGenerateSpins,
+  simStatus,
+  simError,
+}) {
+  return (
+    <div className={styles.section}>
+      <div className={styles.simHeader}>
+        <h3 className={styles.heading}>Test Data Simulator</h3>
+        <button
+          type="button"
+          className={styles.simToggle}
+          onClick={() => setShowSim(!showSim)}
+          aria-expanded={showSim}
+        >
+          {showSim ? '▲ Hide' : '▼ Open Simulator'}
+        </button>
+      </div>
+      {showSim && (
+        <div className={styles.simBody}>
+          <p className={styles.simHelp}>
+            Generates RTP-accurate synthetic spins (tagged{' '}
+            <code>simulated: true</code>) and adds them to your history so you
+            can preview charts without entering real machine data.
+          </p>
+          <div className={styles.simGrid}>
+            <label className={styles.simField}>
+              <span>Spins</span>
+              <input
+                type="number"
+                min="1"
+                value={simForm.count}
+                onChange={(e) => updateSimField('count', e.target.value)}
+              />
+            </label>
+            <label className={styles.simField}>
+              <span>Seed (optional)</span>
+              <input
+                type="text"
+                placeholder="random"
+                value={simForm.seed}
+                onChange={(e) => updateSimField('seed', e.target.value)}
+              />
+            </label>
+            <label className={styles.simField}>
+              <span>Machine name</span>
+              <input
+                type="text"
+                value={simForm.machineName}
+                onChange={(e) => updateSimField('machineName', e.target.value)}
+              />
+            </label>
+            <label className={styles.simField}>
+              <span>Bet ($)</span>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={simForm.betAmount}
+                onChange={(e) => updateSimField('betAmount', e.target.value)}
+              />
+            </label>
+            <label className={styles.simField}>
+              <span>Denomination</span>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={simForm.denomination}
+                onChange={(e) => updateSimField('denomination', e.target.value)}
+              />
+            </label>
+            <label className={styles.simField}>
+              <span>Lines</span>
+              <input
+                type="number"
+                min="1"
+                value={simForm.lines}
+                onChange={(e) => updateSimField('lines', e.target.value)}
+              />
+            </label>
+            <label className={styles.simField}>
+              <span>Starting balance ($)</span>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={simForm.startingBalance}
+                onChange={(e) =>
+                  updateSimField('startingBalance', e.target.value)
+                }
+              />
+            </label>
+            <label className={styles.simField}>
+              <span>RTP (0–1)</span>
+              <input
+                type="number"
+                min="0.5"
+                max="0.99"
+                step="0.01"
+                value={simForm.rtp}
+                onChange={(e) => updateSimField('rtp', e.target.value)}
+              />
+            </label>
+          </div>
+          <div className={styles.simActions}>
+            <button
+              type="button"
+              className={styles.simBtn}
+              onClick={handleGenerateSpins}
+            >
+              🧪 Generate Test Spins
+            </button>
+          </div>
+          {simError && <p className={styles.simError}>{simError}</p>}
+          {simStatus && (
+            <p className={styles.simStatus}>
+              Added <strong>{simStatus.count}</strong> simulated spins · observed
+              RTP {(simStatus.observedRtp * 100).toFixed(1)}% · hit freq{' '}
+              {(simStatus.hitFrequency * 100).toFixed(1)}% · {simStatus.bonuses}{' '}
+              bonus{simStatus.bonuses === 1 ? '' : 'es'} · biggest win $
+              {simStatus.biggestWin.toFixed(2)}
+            </p>
+          )}
         </div>
       )}
     </div>

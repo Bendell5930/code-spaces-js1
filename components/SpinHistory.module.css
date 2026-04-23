@@ -70,3 +70,113 @@
 .paginationRow {
   margin-top: 0.85rem;
 }
+
+/* ── Simulator dev panel ── */
+.simHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.simHeader .heading {
+  margin: 0;
+}
+
+.simToggle {
+  background: transparent;
+  color: #94a3b8;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.simToggle:hover {
+  color: #f1f5f9;
+  border-color: #475569;
+}
+
+.simBody {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.simHelp {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #94a3b8;
+  line-height: 1.4;
+}
+
+.simHelp code {
+  background: #0f172a;
+  padding: 0.05rem 0.35rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  color: #cbd5e1;
+}
+
+.simGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.6rem;
+}
+
+.simField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+.simField input {
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  color: #f1f5f9;
+  padding: 0.4rem 0.55rem;
+  font-size: 0.85rem;
+}
+
+.simField input:focus {
+  outline: none;
+  border-color: #38bdf8;
+}
+
+.simActions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.simBtn {
+  background: #f59e0b;
+  color: #0f172a;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.simBtn:hover {
+  background: #fbbf24;
+}
+
+.simStatus {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #cbd5e1;
+}
+
+.simError {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #f87171;
+}
