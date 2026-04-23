@@ -447,6 +447,12 @@ export default function Home() {
           <>
             <SpinHistory
               spins={plan === PLANS.PREMIUM ? spins : spins.slice(-BASIC_HISTORY_LIMIT)}
+              onAddSpins={(newSpins) => {
+                if (!Array.isArray(newSpins) || newSpins.length === 0) return
+                const updated = [...spins, ...newSpins]
+                setSpins(updated)
+                saveSpins(updated)
+              }}
             />
             {plan !== PLANS.PREMIUM && spins.length > BASIC_HISTORY_LIMIT && (
               <LockedFeature
