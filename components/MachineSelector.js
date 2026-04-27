@@ -4,6 +4,7 @@ import {
   getMergedMachines,
   getSortedBrands,
   CUSTOM_MACHINES_EVENT,
+  CUSTOM_MACHINES_KEY,
   BRAND_VARIANT_SEPARATOR,
 } from '../lib/aiLearning'
 import styles from './MachineSelector.module.css'
@@ -33,13 +34,20 @@ export default function MachineSelector({ value, onChange, initialMachine }) {
     function refresh() {
       setMergedMachines(getMergedMachines())
     }
+    function handleStorage(e) {
+      // Cross-tab `storage` events fire for *any* localStorage key. Only
+      // refresh when the custom-machines key changed (or when the entire
+      // store was cleared, in which case e.key is null).
+      if (e && e.key !== null && e.key !== CUSTOM_MACHINES_KEY) return
+      refresh()
+    }
     refresh()
     if (typeof window === 'undefined') return undefined
     window.addEventListener(CUSTOM_MACHINES_EVENT, refresh)
-    window.addEventListener('storage', refresh)
+    window.addEventListener('storage', handleStorage)
     return () => {
       window.removeEventListener(CUSTOM_MACHINES_EVENT, refresh)
-      window.removeEventListener('storage', refresh)
+      window.removeEventListener('storage', handleStorage)
     }
   }, [])
 
@@ -51,16 +59,22 @@ export default function MachineSelector({ value, onChange, initialMachine }) {
     if (!initialMachine || brand) return
     const merged = getMergedMachines()
     setMergedMachines(merged)
-    const { brand: b, variant: v } = splitInitialMachine(initialMachine)
-    if (!b || !merged[b]) return
-    setBrand(b)
-    const variants = merged[b] || []
+    const { brand: rawBrand, variant: v } = splitInitialMachine(initialMachine)
+    if (!rawBrand) return
+    // Case-insensitive brand lookup so values from external sources
+    // (e.g. user-edited AutoDiscovery input) still match the canonical key.
+    const canonicalBrand = merged[rawBrand]
+      ? rawBrand
+      : Object.keys(merged).find((k) => k.toLowerCase() === rawBrand.toLowerCase())
+    if (!canonicalBrand) return
+    setBrand(canonicalBrand)
+    const variants = merged[canonicalBrand] || []
     if (v && variants.some((x) => x.toLowerCase() === v.toLowerCase())) {
       const matched = variants.find((x) => x.toLowerCase() === v.toLowerCase())
       setVariant(matched)
-      if (onChange) onChange(`${b}${BRAND_VARIANT_SEPARATOR}${matched}`)
+      if (onChange) onChange(`${canonicalBrand}${BRAND_VARIANT_SEPARATOR}${matched}`)
     } else if (onChange) {
-      onChange(b)
+      onChange(canonicalBrand)
     }
     // We intentionally only run this on mount / when `initialMachine` changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps

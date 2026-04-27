@@ -636,7 +636,7 @@ export default function AIVideoCapture({ onCapture, calculatorRef, venueId, venu
               AI AUTO MODE
             </div>
 
-            {/* REC indicator — top-right alongside privacy badge */}
+            {/* REC indicator — top-right of video preview */}
             <div className={styles.recBadge}>
               <span className={styles.recDot} />
               REC
