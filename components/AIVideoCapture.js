@@ -27,11 +27,11 @@ const STEPS = {
   SCANNING: 'SCANNING',
 }
 
-export default function AIVideoCapture({ onCapture, calculatorRef, venueId, venueName, venueSuburb, venueRegion }) {
+export default function AIVideoCapture({ onCapture, calculatorRef, venueId, venueName, venueSuburb, venueRegion, initialMachine }) {
   const [step, setStep] = useState(STEPS.SETUP)
 
   // Quick-setup: only machine + denomination (bet & lines auto-detected)
-  const [machineName, setMachineName] = useState('')
+  const [machineName, setMachineName] = useState(initialMachine || '')
   const [denomination, setDenomination] = useState('0.01')
 
   // Location state
@@ -533,7 +533,11 @@ export default function AIVideoCapture({ onCapture, calculatorRef, venueId, venu
             <div className={styles.setupError}>⚠ {guardMsg}</div>
           )}
 
-          <MachineSelector value={machineName} onChange={setMachineName} />
+          <MachineSelector
+            value={machineName}
+            onChange={setMachineName}
+            initialMachine={initialMachine}
+          />
 
           {/* Denomination chips — only manual input needed */}
           <fieldset className={styles.fieldset}>
@@ -632,7 +636,7 @@ export default function AIVideoCapture({ onCapture, calculatorRef, venueId, venu
               AI AUTO MODE
             </div>
 
-            {/* REC indicator — top-right alongside privacy badge */}
+            {/* REC indicator — top-right of video preview */}
             <div className={styles.recBadge}>
               <span className={styles.recDot} />
               REC

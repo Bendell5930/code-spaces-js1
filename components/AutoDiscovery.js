@@ -8,7 +8,7 @@
  * Usage:
  *   <AutoDiscovery
  *     onComplete={(venue, machineName) => { ... }}
- *     onStartScan={() => { ... }}
+ *     onStartScan={(machineName, machineVariant) => { ... }}
  *     onClose={() => { ... }}
  *   />
  *
@@ -78,8 +78,17 @@ function loadTesseract() {
     tesseractLoading = true
     const script = document.createElement('script')
     script.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'
-    script.onload = () => { tesseractReady = true; resolve(window.Tesseract) }
-    script.onerror = () => reject(new Error('Failed to load Tesseract.js'))
+    script.onload = () => {
+      tesseractLoading = false
+      tesseractReady = true
+      resolve(window.Tesseract)
+    }
+    script.onerror = () => {
+      tesseractLoading = false
+      tesseractReady = false
+      script.remove()
+      reject(new Error('Failed to load Tesseract.js'))
+    }
     document.head.appendChild(script)
   })
 }
@@ -704,7 +713,7 @@ export default function AutoDiscovery({ onComplete, onStartScan, onClose }) {
             <button
               className={styles.btnScan}
               onClick={() => {
-                if (onStartScan) onStartScan()
+                if (onStartScan) onStartScan(machineName.trim(), machineVariant.trim())
                 if (onClose) onClose()
               }}
             >
