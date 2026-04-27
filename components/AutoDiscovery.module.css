@@ -329,6 +329,57 @@
   line-height: 1.5;
 }
 
+/* ── Venue capture choice cards ── */
+.captureChoiceGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.captureChoiceCard {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  text-align: left;
+  font-family: inherit;
+  width: 100%;
+}
+
+.captureChoiceCard:hover {
+  border-color: #f59e0b;
+  background: rgba(245, 158, 11, 0.06);
+}
+
+.captureChoiceIcon {
+  font-size: 1.8rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.captureChoiceBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.captureChoiceTitle {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.captureChoiceDesc {
+  font-size: 0.75rem;
+  color: #64748b;
+  line-height: 1.4;
+}
+
 /* ── Trigger button (wired into VenueCheckIn) ── */
 .triggerBtn {
   display: flex;
