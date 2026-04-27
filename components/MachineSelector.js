@@ -66,6 +66,7 @@ export default function MachineSelector({ value, onChange, initialMachine }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialMachine])
 
+
   const brands   = getSortedBrands(mergedMachines)
   const variants = brand ? (mergedMachines[brand] || []) : []
 
