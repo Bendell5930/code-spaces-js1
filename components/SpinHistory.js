@@ -17,7 +17,7 @@ const RECENT_SPINS_PAGE_SIZE = 20
 
 export default function SpinHistory({ spins, onAddSpins }) {
   const [recentPage, setRecentPage] = useState(1)
-  const [showSim, setShowSim] = useState(false)
+  const [showSim, setShowSim] = useState(true)
   const [simForm, setSimForm] = useState({
     count: 200,
     seed: '',
@@ -313,16 +313,16 @@ function renderSimulatorPanel({
   simError,
 }) {
   return (
-    <div className={styles.section}>
+    <div className={`${styles.section} ${styles.simSection}`}>
       <div className={styles.simHeader}>
-        <h3 className={styles.heading}>Test Data Simulator</h3>
+        <h3 className={styles.simHeading}>Test Data Simulator</h3>
         <button
           type="button"
           className={styles.simToggle}
           onClick={() => setShowSim(!showSim)}
           aria-expanded={showSim}
         >
-          {showSim ? '▲ Hide' : '▼ Open Simulator'}
+          {showSim ? '▲ Hide Simulator' : '▼ Show Simulator'}
         </button>
       </div>
       {showSim && (

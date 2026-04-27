@@ -72,6 +72,20 @@
 }
 
 /* ── Simulator dev panel ── */
+.simSection {
+  background: #1f2a44;
+  border-left: 3px solid #f59e0b;
+}
+
+.simHeading {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #f1f5f9;
+  margin: 0 0 1rem 0;
+}
+
 .simHeader {
   display: flex;
   justify-content: space-between;
@@ -85,18 +99,18 @@
 }
 
 .simToggle {
-  background: transparent;
-  color: #94a3b8;
-  border: 1px solid #334155;
+  background: #f59e0b;
+  color: #0f172a;
+  border: none;
   border-radius: 6px;
-  padding: 0.3rem 0.7rem;
+  padding: 0.45rem 0.9rem;
   font-size: 0.75rem;
+  font-weight: 600;
   cursor: pointer;
 }
 
 .simToggle:hover {
-  color: #f1f5f9;
-  border-color: #475569;
+  background: #fbbf24;
 }
 
 .simBody {
