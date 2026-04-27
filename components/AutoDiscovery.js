@@ -28,15 +28,16 @@ import styles from './AutoDiscovery.module.css'
 
 // ─── Wizard step constants ───────────────────────────────────────────────────
 const STEP = {
-  IDLE:              'IDLE',
-  GPS_LOOKUP:        'GPS_LOOKUP',
-  VENUE_CAMERA:      'VENUE_CAMERA',
-  VENUE_OCR:         'VENUE_OCR',
-  VENUE_CONFIRM:     'VENUE_CONFIRM',
-  MACHINE_CAMERA:    'MACHINE_CAMERA',
-  MACHINE_OCR:       'MACHINE_OCR',
-  MACHINE_CONFIRM:   'MACHINE_CONFIRM',
-  DONE:              'DONE',
+  IDLE:                  'IDLE',
+  GPS_LOOKUP:            'GPS_LOOKUP',
+  VENUE_CAPTURE_CHOICE:  'VENUE_CAPTURE_CHOICE',
+  VENUE_CAMERA:          'VENUE_CAMERA',
+  VENUE_OCR:             'VENUE_OCR',
+  VENUE_CONFIRM:         'VENUE_CONFIRM',
+  MACHINE_CAMERA:        'MACHINE_CAMERA',
+  MACHINE_OCR:           'MACHINE_OCR',
+  MACHINE_CONFIRM:       'MACHINE_CONFIRM',
+  DONE:                  'DONE',
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -45,6 +46,10 @@ const DEFAULT_VENUE_RADIUS_METERS = 75
 
 /** Maximum time (ms) to wait for Tesseract to become available after injection */
 const TESSERACT_LOAD_TIMEOUT_MS = 30_000
+
+/** Min/max character lengths for a plausible venue name line (interior OCR) */
+const MIN_VENUE_NAME_LENGTH = 3
+const MAX_VENUE_NAME_LENGTH = 60
 
 // ─── Lazy Tesseract loader ───────────────────────────────────────────────────
 let tesseractLoading = false
@@ -138,6 +143,9 @@ export default function AutoDiscovery({ onComplete, onStartScan, onClose }) {
   const [gpsCoords, setGpsCoords]           = useState(null)
   const [venueDupe, setVenueDupe]           = useState(null)
 
+  // Capture source for venue: 'exterior' (front sign) or 'interior' (inside signage)
+  const [captureSource, setCaptureSource]   = useState('exterior')
+
   // Machine state
   const [machineName, setMachineName]       = useState('')
   const [machineVariant, setMachineVariant] = useState('')
@@ -163,8 +171,8 @@ export default function AutoDiscovery({ onComplete, onStartScan, onClose }) {
         if (cancelled) return
 
         if (!pos) {
-          // No GPS — go straight to venue camera
-          setStep(STEP.VENUE_CAMERA)
+          // No GPS — go to venue capture choice
+          setStep(STEP.VENUE_CAPTURE_CHOICE)
           return
         }
 
@@ -188,10 +196,10 @@ export default function AutoDiscovery({ onComplete, onStartScan, onClose }) {
           if (onComplete) onComplete(nearby, null)
           setStep(STEP.MACHINE_CAMERA)
         } else {
-          setStep(STEP.VENUE_CAMERA)
+          setStep(STEP.VENUE_CAPTURE_CHOICE)
         }
       } catch {
-        if (!cancelled) setStep(STEP.VENUE_CAMERA)
+        if (!cancelled) setStep(STEP.VENUE_CAPTURE_CHOICE)
       }
     })()
 
@@ -233,9 +241,25 @@ export default function AutoDiscovery({ onComplete, onStartScan, onClose }) {
     try {
       const blob = await captureFrame(videoRef.current)
       const text = await runOcr(blob)
-      const name = toTitleCase(
-        text.split(/[\n\r]+/).find((l) => l.trim().length > 2)?.trim() || ''
-      )
+
+      let name
+      if (captureSource === 'interior') {
+        // Interior captures (menus, posters, etc.) may have more text noise.
+        // Pick the longest meaningful line as the most likely venue name.
+        const lines = text
+          .split(/[\n\r]+/)
+          .map((l) => l.trim())
+          .filter((l) => l.length >= MIN_VENUE_NAME_LENGTH && l.length <= MAX_VENUE_NAME_LENGTH)
+        const best = lines.length > 0
+          ? lines.slice().sort((a, b) => b.length - a.length)[0]
+          : ''
+        name = toTitleCase(best)
+      } else {
+        // Exterior sign: first non-trivial line is the venue name
+        name = toTitleCase(
+          text.split(/[\n\r]+/).find((l) => l.trim().length > 2)?.trim() || ''
+        )
+      }
 
       // Reverse-geocode to get suburb label
       let suburb = ''
@@ -261,7 +285,7 @@ export default function AutoDiscovery({ onComplete, onStartScan, onClose }) {
       setVenueName('')
       setStep(STEP.VENUE_CONFIRM)
     }
-  }, [gpsCoords])
+  }, [gpsCoords, captureSource])
 
   // ── Confirm venue ───────────────────────────────────────────────────────────
   function handleVenueConfirm() {
@@ -331,6 +355,17 @@ export default function AutoDiscovery({ onComplete, onStartScan, onClose }) {
     setStep(STEP.DONE)
   }
 
+  // ── Venue capture source selection ──────────────────────────────────────────
+  function chooseExterior() {
+    setCaptureSource('exterior')
+    setStep(STEP.VENUE_CAMERA)
+  }
+
+  function chooseInterior() {
+    setCaptureSource('interior')
+    setStep(STEP.VENUE_CAMERA)
+  }
+
   // ── Skip helpers ────────────────────────────────────────────────────────────
   function skipVenueCamera() {
     stopCamera(streamRef.current)
@@ -369,16 +404,69 @@ export default function AutoDiscovery({ onComplete, onStartScan, onClose }) {
           </>
         )}
 
+        {/* ── Venue capture choice ── */}
+        {step === STEP.VENUE_CAPTURE_CHOICE && (
+          <>
+            <span className={styles.stepBadge}>Step 2 of 4 — Venue Name</span>
+            <h2 className={styles.heading}>🏨 How would you like to capture the venue name?</h2>
+            <p className={styles.subheading}>
+              Choose the option that best describes where you are right now.
+            </p>
+
+            <div className={styles.captureChoiceGrid}>
+              <button className={styles.captureChoiceCard} onClick={chooseExterior}>
+                <span className={styles.captureChoiceIcon}>🚪</span>
+                <span className={styles.captureChoiceBody}>
+                  <span className={styles.captureChoiceTitle}>Front / Exterior Sign</span>
+                  <span className={styles.captureChoiceDesc}>
+                    Point your camera at the sign on the outside of the venue (e.g. building facade, entrance sign).
+                  </span>
+                </span>
+              </button>
+
+              <button className={styles.captureChoiceCard} onClick={chooseInterior}>
+                <span className={styles.captureChoiceIcon}>🪧</span>
+                <span className={styles.captureChoiceBody}>
+                  <span className={styles.captureChoiceTitle}>Inside the Venue</span>
+                  <span className={styles.captureChoiceDesc}>
+                    Point your camera at interior signage, a menu, a receipt, wall art, or any branded item that shows the venue name.
+                  </span>
+                </span>
+              </button>
+            </div>
+
+            <div className={styles.btnRow}>
+              <button className={styles.btnSecondary} onClick={skipVenueCamera}>
+                ✏️ Enter Manually
+              </button>
+              <button className={styles.btnDanger} onClick={onClose}>✕ Cancel</button>
+            </div>
+          </>
+        )}
+
         {/* ── Venue camera ── */}
         {step === STEP.VENUE_CAMERA && (
           <>
             <span className={styles.stepBadge}>Step 2 of 4 — Venue Sign</span>
-            <h2 className={styles.heading}>
-              🏨 Point your camera at the <strong style={{ color: '#fbbf24' }}>front venue sign</strong>
-            </h2>
-            <p className={styles.subheading}>
-              Align the sign inside the golden frame, then tap Capture.
-            </p>
+            {captureSource === 'interior' ? (
+              <>
+                <h2 className={styles.heading}>
+                  🪧 Point your camera at <strong style={{ color: '#fbbf24' }}>interior signage, a menu, or a branded item</strong>
+                </h2>
+                <p className={styles.subheading}>
+                  Align the item inside the golden frame so the venue name is visible, then tap Capture.
+                </p>
+              </>
+            ) : (
+              <>
+                <h2 className={styles.heading}>
+                  🏨 Point your camera at the <strong style={{ color: '#fbbf24' }}>front venue sign</strong>
+                </h2>
+                <p className={styles.subheading}>
+                  Align the sign inside the golden frame, then tap Capture.
+                </p>
+              </>
+            )}
 
             {error && <div className={styles.infoMsg}>{error}</div>}
 
@@ -395,13 +483,14 @@ export default function AutoDiscovery({ onComplete, onStartScan, onClose }) {
 
             <div className={styles.btnRow}>
               <button className={styles.btnPrimary} onClick={handleVenueCapture}>
-                📸 Capture Sign
+                {captureSource === 'interior' ? '📸 Capture Item' : '📸 Capture Sign'}
               </button>
               <button className={styles.btnSecondary} onClick={skipVenueCamera}>
                 ✏️ Enter Manually
               </button>
             </div>
-            <button className={styles.btnDanger} onClick={onClose}>✕ Cancel</button>
+            <button className={styles.btnDanger} onClick={() => setStep(STEP.VENUE_CAPTURE_CHOICE)}
+              aria-label="Go back to capture choice">← Back</button>
           </>
         )}
 
