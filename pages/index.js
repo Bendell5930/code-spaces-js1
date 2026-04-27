@@ -442,7 +442,7 @@ export default function Home() {
             onSetActiveVenue={handleSetActiveVenue}
           />
         ) : tab === 'viral' ? (
-          <ViralHub spins={spins} />
+          <ViralHub spins={spins} onStartScan={() => switchTab('scan')} />
         ) : (
           <>
             <SpinHistory

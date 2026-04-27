@@ -50,7 +50,7 @@ const FEATURES = {
   ],
 }
 
-export default function ViralHub({ spins }) {
+export default function ViralHub({ spins, onStartScan }) {
   const [group, setGroup] = useState('social')
   const [feature, setFeature] = useState('checkin')
   const [activeVenue, setActiveVenue] = useState(null)
@@ -139,6 +139,7 @@ export default function ViralHub({ spins }) {
           <VenueCheckIn
             activeVenue={activeVenue}
             onSelectVenue={persistActiveVenue}
+            onStartScan={onStartScan}
           />
         )}
         {feature === 'venues' && <TrackedVenueList />}

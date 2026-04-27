@@ -1,13 +1,20 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { MACHINES } from '../data/machines'
+import { getMergedMachines, getSortedBrands } from '../lib/aiLearning'
 import styles from './MachineSelector.module.css'
 
 export default function MachineSelector({ value, onChange }) {
   const [brand, setBrand] = useState('')
   const [variant, setVariant] = useState('')
+  const [mergedMachines, setMergedMachines] = useState(MACHINES)
 
-  const brands = Object.keys(MACHINES)
-  const variants = brand ? MACHINES[brand] : []
+  // Load merged machines (built-in + custom) on mount
+  useEffect(() => {
+    setMergedMachines(getMergedMachines())
+  }, [])
+
+  const brands   = getSortedBrands(mergedMachines)
+  const variants = brand ? (mergedMachines[brand] || []) : []
 
   function handleBrandChange(e) {
     const b = e.target.value
