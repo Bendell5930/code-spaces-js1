@@ -15,13 +15,9 @@ import styles from './SpinHistory.module.css'
 
 const RECENT_SPINS_PAGE_SIZE = 20
 
-// Test Data Simulator is a development-only utility — only render it
-// outside production builds so it doesn't ship to end users.
-const SIMULATOR_ENABLED = process.env.NODE_ENV !== 'production'
-
 export default function SpinHistory({ spins, onAddSpins }) {
   const [recentPage, setRecentPage] = useState(1)
-  const [showSim, setShowSim] = useState(false)
+  const [showSim, setShowSim] = useState(true)
   const [simForm, setSimForm] = useState({
     count: 200,
     seed: '',
@@ -154,7 +150,7 @@ export default function SpinHistory({ spins, onAddSpins }) {
         <div className={styles.empty}>
           <p>No spins logged yet. Use the form to start recording data.</p>
         </div>
-        {SIMULATOR_ENABLED && onAddSpins && renderSimulatorPanel({
+        {onAddSpins && renderSimulatorPanel({
           showSim,
           setShowSim,
           simForm,
@@ -169,7 +165,7 @@ export default function SpinHistory({ spins, onAddSpins }) {
 
   return (
     <div className={styles.wrapper}>
-      {SIMULATOR_ENABLED && onAddSpins && renderSimulatorPanel({
+      {onAddSpins && renderSimulatorPanel({
         showSim,
         setShowSim,
         simForm,
