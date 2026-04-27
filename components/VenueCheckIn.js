@@ -4,17 +4,29 @@ import {
 } from '../lib/viralStore'
 import { playTap, playSuccess } from '../lib/sounds'
 import VenuePicker from './VenuePicker'
+import AutoDiscovery from './AutoDiscovery'
 
-export default function VenueCheckIn({ activeVenue, onSelectVenue }) {
+export default function VenueCheckIn({ activeVenue, onSelectVenue, onStartScan }) {
   const [myCheckIn, setMyCheckIn] = useState(null)
   const [allCheckIns, setAllCheckIns] = useState([])
   const [status, setStatus] = useState('casual')
   const [machine, setMachine] = useState('')
+  const [showAutoDiscovery, setShowAutoDiscovery] = useState(false)
 
   useEffect(() => {
     setMyCheckIn(getMyActiveCheckIn())
     setAllCheckIns(getActiveCheckIns())
   }, [])
+
+  function handleAutoDiscoveryComplete(venue, machineName) {
+    // Reflect the auto-detected venue into parent state
+    if (venue && onSelectVenue) onSelectVenue(venue)
+    if (machineName) setMachine(machineName)
+    // Refresh check-in display
+    setMyCheckIn(getMyActiveCheckIn())
+    setAllCheckIns(getActiveCheckIns())
+    playSuccess()
+  }
 
   function handleCheckIn() {
     if (!activeVenue) return
@@ -81,6 +93,23 @@ export default function VenueCheckIn({ activeVenue, onSelectVenue }) {
             📍 Check In at a Venue
           </div>
 
+          {/* ── AI Auto-detect button ── */}
+          <button
+            onClick={() => { playTap(); setShowAutoDiscovery(true) }}
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              gap: '0.45rem', width: '100%',
+              background: 'linear-gradient(135deg, rgba(99,102,241,0.18), rgba(79,70,229,0.12))',
+              border: '1px solid rgba(99,102,241,0.35)',
+              borderRadius: 10, color: '#a5b4fc', fontSize: '0.83rem', fontWeight: 600,
+              padding: '0.55rem 0.9rem', cursor: 'pointer', marginBottom: '0.6rem',
+              fontFamily: 'inherit',
+            }}
+          >
+            <span style={{ fontSize: '1.1rem' }}>🤖</span>
+            Auto-detect Venue &amp; Machine
+          </button>
+
           {/* Inline venue picker — pick once and the same venue is reused
               for Reviews and other social tabs (shared via ViralHub). */}
           <div style={{ marginBottom: '0.6rem' }}>
@@ -88,7 +117,7 @@ export default function VenueCheckIn({ activeVenue, onSelectVenue }) {
               activeVenue={activeVenue}
               onSelect={onSelectVenue}
               onClear={onSelectVenue ? () => onSelectVenue(null) : undefined}
-              label="Pick the venue you're at"
+              label="Or pick the venue you're at"
             />
           </div>
 
@@ -168,6 +197,15 @@ export default function VenueCheckIn({ activeVenue, onSelectVenue }) {
           <div style={{ fontSize: '2rem', marginBottom: '0.3rem' }}>📍</div>
           Be the first to check in today!
         </div>
+      )}
+
+      {/* Auto-discovery wizard modal */}
+      {showAutoDiscovery && (
+        <AutoDiscovery
+          onComplete={handleAutoDiscoveryComplete}
+          onStartScan={onStartScan}
+          onClose={() => setShowAutoDiscovery(false)}
+        />
       )}
     </div>
   )
