@@ -39,6 +39,13 @@ const STEP = {
   DONE:              'DONE',
 }
 
+// ─── Constants ────────────────────────────────────────────────────────────────
+/** GPS radius in metres within which a venue is considered "nearby" */
+const DEFAULT_VENUE_RADIUS_METERS = 75
+
+/** Maximum time (ms) to wait for Tesseract to become available after injection */
+const TESSERACT_LOAD_TIMEOUT_MS = 30_000
+
 // ─── Lazy Tesseract loader ───────────────────────────────────────────────────
 let tesseractLoading = false
 let tesseractReady   = false
@@ -49,9 +56,17 @@ function loadTesseract() {
       return resolve(window.Tesseract)
     }
     if (tesseractLoading) {
-      // Poll until ready
+      // Poll until ready or timeout
+      const deadline = Date.now() + TESSERACT_LOAD_TIMEOUT_MS
       const iv = setInterval(() => {
-        if (window.Tesseract) { clearInterval(iv); tesseractReady = true; resolve(window.Tesseract) }
+        if (window.Tesseract) {
+          clearInterval(iv)
+          tesseractReady = true
+          resolve(window.Tesseract)
+        } else if (Date.now() > deadline) {
+          clearInterval(iv)
+          reject(new Error('Tesseract.js did not load within the timeout'))
+        }
       }, 200)
       return
     }
@@ -155,7 +170,7 @@ export default function AutoDiscovery({ onComplete, onStartScan, onClose }) {
 
         setGpsCoords(pos)
         const venues  = getAllVenues()
-        const nearby  = findNearbyVenue(pos.lat, pos.lng, venues, 75)
+        const nearby  = findNearbyVenue(pos.lat, pos.lng, venues, DEFAULT_VENUE_RADIUS_METERS)
 
         if (nearby) {
           // We already know this venue — skip venue capture
