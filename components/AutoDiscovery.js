@@ -8,7 +8,7 @@
  * Usage:
  *   <AutoDiscovery
  *     onComplete={(venue, machineName) => { ... }}
- *     onStartScan={() => { ... }}
+ *     onStartScan={(machineName, machineVariant) => { ... }}
  *     onClose={() => { ... }}
  *   />
  *
@@ -704,7 +704,7 @@ export default function AutoDiscovery({ onComplete, onStartScan, onClose }) {
             <button
               className={styles.btnScan}
               onClick={() => {
-                if (onStartScan) onStartScan()
+                if (onStartScan) onStartScan(machineName.trim(), machineVariant.trim())
                 if (onClose) onClose()
               }}
             >

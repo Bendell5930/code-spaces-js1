@@ -18,6 +18,7 @@ import { loadSubscription, verifySubscription, applyPremiumUnlock, handleCheckou
 import { loadProfile, saveProfile, clearProfile } from '../lib/profileStore'
 import { evaluateBingoFromSpin } from '../lib/viralStore'
 import { resumeAudio, playTap, playSwitch, playSuccess, playCoin, playWarn } from '../lib/sounds'
+import { BRAND_VARIANT_SEPARATOR } from '../lib/aiLearning'
 import styles from '../styles/home.module.css'
 
 const STORAGE_KEY = 'pokie-analyzer-spins'
@@ -46,6 +47,9 @@ export default function Home() {
   const [toast, setToast] = useState(null)
   const [profile, setProfile] = useState(null)
   const [profileLoaded, setProfileLoaded] = useState(false)
+  // Pre-selected machine (e.g. just-discovered via Auto Detect) to surface
+  // in AIVideoCapture's MachineSelector when the AI Scan tab next mounts.
+  const [pendingScanMachine, setPendingScanMachine] = useState('')
   const spinCallbackRef = useRef(null)
   const calculatorRef = useRef(null)
   const [, forceUpdate] = useState(0)
@@ -422,6 +426,7 @@ export default function Home() {
             venueName={activeVenue?.name}
             venueSuburb={activeVenue?.suburb}
             venueRegion={activeVenue?.region}
+            initialMachine={pendingScanMachine}
           />
         ) : tab === 'heat' ? (
           <MachineHeatMap spins={spins} />
@@ -442,7 +447,18 @@ export default function Home() {
             onSetActiveVenue={handleSetActiveVenue}
           />
         ) : tab === 'viral' ? (
-          <ViralHub spins={spins} onStartScan={() => switchTab('scan')} />
+          <ViralHub
+            spins={spins}
+            onStartScan={(brand, variant) => {
+              if (brand) {
+                const composed = variant
+                  ? `${brand}${BRAND_VARIANT_SEPARATOR}${variant}`
+                  : brand
+                setPendingScanMachine(composed)
+              }
+              switchTab('scan')
+            }}
+          />
         ) : (
           <>
             <SpinHistory
