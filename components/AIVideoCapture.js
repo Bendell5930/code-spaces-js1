@@ -8,6 +8,7 @@ import {
   enforceAudioOff,
   resetGuard,
 } from '../lib/privacyGuard'
+import { analyzeFrameQuality } from '../lib/frameQuality'
 import { postWin } from '../lib/communityStore'
 import { isGeoAvailable, getLocationLabel } from '../lib/geolocation'
 import { playTap, playScan, playSuccess, playWarn, playCoin } from '../lib/sounds'
@@ -16,6 +17,10 @@ import { getOrAssignCode } from '../lib/machineLegend'
 import styles from './AIVideoCapture.module.css'
 
 const BIG_WIN_THRESHOLD = 100 // $100+ auto-posted to leaderboard
+
+// How many RAF frames to skip between quality-analysis runs.
+// At 60 fps this gives ~4 quality checks per second — responsive but cheap.
+const QUALITY_CHECK_INTERVAL = 15
 
 const STEPS = {
   SETUP: 'SETUP',
@@ -57,6 +62,30 @@ export default function AIVideoCapture({ onCapture, calculatorRef, venueId, venu
   const scanWinLogRef = useRef([])
   const scanStartRef = useRef(Date.now())
 
+  // ── Live session prompts ──────────────────────────────────────────────
+  // Camera startup states
+  const [cameraStarting, setCameraStarting] = useState(false)
+  const [cameraReadyToast, setCameraReadyToast] = useState(false)
+  // Per-frame quality prompts (auto-update in RAF loop)
+  const [framePrompts, setFramePrompts] = useState({
+    notInView: false, dark: false, bright: false, glare: false, shake: false,
+  })
+  // Transition toasts
+  const [framedOkToast, setFramedOkToast] = useState(false)
+  const [resumedToast, setResumedToast] = useState(false)
+  // End-of-session confirmation
+  const [savedToast, setSavedToast] = useState(false)
+  // Camera permission error
+  const [permError, setPermError] = useState(false)
+
+  // Refs used inside the RAF loop (avoid stale closures)
+  const prevSampleRef = useRef(null)
+  const prevNotInViewRef = useRef(false)
+  const framedOkTimerRef = useRef(null)
+  const prevGuardStatusRef = useRef(GUARD_STATUS.OK)
+  const resumedTimerRef = useRef(null)
+  const qualityTickRef = useRef(0) // throttle quality analysis to every 15 frames
+
   const canStartScan = machineName && denomination
 
   // ─── Enable Location ───
@@ -75,6 +104,8 @@ export default function AIVideoCapture({ onCapture, calculatorRef, venueId, venu
 
   // ─── Start camera (video-only, NO audio) ───
   const startCamera = useCallback(async () => {
+    setCameraStarting(true)
+    setPermError(false)
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
@@ -91,7 +122,12 @@ export default function AIVideoCapture({ onCapture, calculatorRef, venueId, venu
       setAiStats({ spins: 0, wins: 0, bonuses: 0, totalWon: 0, detectedBet: null, detectedLines: null, lastEvent: null })
       setGuardMsg(null)
       setGuardStatus(GUARD_STATUS.OK)
+      setCameraStarting(false)
       setStep(STEPS.SCANNING)
+
+      // Brief "Camera ready" confirmation toast
+      setCameraReadyToast(true)
+      setTimeout(() => setCameraReadyToast(false), 2500)
 
       // Push initial denomination to calculator
       const denomVal = parseFloat(denomination)
@@ -100,7 +136,17 @@ export default function AIVideoCapture({ onCapture, calculatorRef, venueId, venu
       }
       playScan()
     } catch (err) {
-      setGuardMsg('Camera access denied. Please allow camera permissions.')
+      setCameraStarting(false)
+      // Distinguish permission denial from other errors
+      if (
+        err.name === 'NotAllowedError' ||
+        err.name === 'PermissionDeniedError' ||
+        err.name === 'SecurityError'
+      ) {
+        setPermError(true)
+      } else {
+        setGuardMsg('Camera unavailable. Please check your device settings.')
+      }
       playWarn()
     }
   }, [denomination, machineName, calculatorRef])
@@ -117,6 +163,22 @@ export default function AIVideoCapture({ onCapture, calculatorRef, venueId, venu
     if (calculatorRef?.current?.endLiveSync) {
       calculatorRef.current.endLiveSync()
     }
+    // Reset live-prompt refs so they start fresh on next session
+    prevSampleRef.current = null
+    prevNotInViewRef.current = false
+    prevGuardStatusRef.current = GUARD_STATUS.OK
+    qualityTickRef.current = 0
+    if (framedOkTimerRef.current) {
+      clearTimeout(framedOkTimerRef.current)
+      framedOkTimerRef.current = null
+    }
+    if (resumedTimerRef.current) {
+      clearTimeout(resumedTimerRef.current)
+      resumedTimerRef.current = null
+    }
+    setFramePrompts({ notInView: false, dark: false, bright: false, glare: false, shake: false })
+    setFramedOkToast(false)
+    setResumedToast(false)
   }, [calculatorRef])
 
   // ─── Frame-processing loop with AUTO event detection ───
@@ -139,6 +201,17 @@ export default function AIVideoCapture({ onCapture, calculatorRef, venueId, venu
         const verdict = evaluateFrame(canvas, machineName)
         setGuardStatus(verdict.status)
 
+        // ── Recording pause / resume tracking ──────────────────────────
+        const wasOk = prevGuardStatusRef.current === GUARD_STATUS.OK
+        prevGuardStatusRef.current = verdict.status
+        if (!wasOk && verdict.status === GUARD_STATUS.OK && !resumedTimerRef.current) {
+          setResumedToast(true)
+          resumedTimerRef.current = setTimeout(() => {
+            setResumedToast(false)
+            resumedTimerRef.current = null
+          }, 2000)
+        }
+
         if (verdict.status === GUARD_STATUS.PERSON_DETECTED) {
           setGuardMsg('⚠ Person detected – recording paused')
           playWarn()
@@ -159,6 +232,42 @@ export default function AIVideoCapture({ onCapture, calculatorRef, venueId, venu
           return
         } else {
           setGuardMsg(null)
+
+          // ── Frame quality analysis (throttled: every QUALITY_CHECK_INTERVAL frames) ──
+          qualityTickRef.current = (qualityTickRef.current + 1) % QUALITY_CHECK_INTERVAL
+          if (qualityTickRef.current === 0) {
+            const quality = analyzeFrameQuality(canvas, prevSampleRef)
+            const notInView = !verdict.region
+
+            // "Framed correctly" toast on transition from not-in-view → in-view
+            if (prevNotInViewRef.current && !notInView && !framedOkTimerRef.current) {
+              setFramedOkToast(true)
+              framedOkTimerRef.current = setTimeout(() => {
+                setFramedOkToast(false)
+                framedOkTimerRef.current = null
+              }, 2000)
+            }
+            prevNotInViewRef.current = notInView
+
+            setFramePrompts(prev => {
+              const next = {
+                notInView,
+                dark: quality.dark,
+                bright: quality.bright,
+                glare: quality.glare,
+                shake: quality.shake,
+              }
+              // Bail out early if nothing changed (avoid re-render every tick)
+              if (
+                prev.notInView === next.notInView &&
+                prev.dark === next.dark &&
+                prev.bright === next.bright &&
+                prev.glare === next.glare &&
+                prev.shake === next.shake
+              ) return prev
+              return next
+            })
+          }
         }
 
         // ── AUTO MODE: Extract data and push events to calculator ──
@@ -371,7 +480,9 @@ export default function AIVideoCapture({ onCapture, calculatorRef, venueId, venu
     }
 
     stopCamera()
-    playTap()
+    playSuccess()
+    setSavedToast(true)
+    setTimeout(() => setSavedToast(false), 3500)
     setCapturedData(null)
     setStep(STEPS.SETUP)
   }
@@ -389,6 +500,38 @@ export default function AIVideoCapture({ onCapture, calculatorRef, venueId, venu
             Select your machine and denomination. Point your camera at the screen and tap <strong>Start</strong>.
             AI will auto-detect spins, wins, bets, lines, and bonuses — no interaction needed.
           </p>
+
+          {/* Session saved confirmation */}
+          {savedToast && (
+            <div className={styles.savedBanner}>
+              ✅ Session recording saved successfully!
+            </div>
+          )}
+
+          {/* Camera permission error */}
+          {permError && (
+            <div className={styles.permError}>
+              <span className={styles.permErrorIcon}>🔒</span>
+              <div className={styles.permErrorBody}>
+                <strong className={styles.permErrorTitle}>Camera permission required</strong>
+                <p className={styles.permErrorHint}>
+                  Allow camera access so AI Scan can record your session.
+                  Open your browser or device settings, find this site, and set Camera to&nbsp;<em>Allow</em>.
+                </p>
+              </div>
+              <button
+                className={styles.permErrorBtn}
+                onClick={() => setPermError(false)}
+              >
+                Got it
+              </button>
+            </div>
+          )}
+
+          {/* General camera error (non-permission) */}
+          {guardMsg && step === STEPS.SETUP && (
+            <div className={styles.setupError}>⚠ {guardMsg}</div>
+          )}
 
           <MachineSelector value={machineName} onChange={setMachineName} />
 
@@ -449,10 +592,10 @@ export default function AIVideoCapture({ onCapture, calculatorRef, venueId, venu
 
           <button
             className={styles.scanBtn}
-            disabled={!canStartScan}
+            disabled={!canStartScan || cameraStarting}
             onClick={startCamera}
           >
-            🎯 Start AI Live Scan
+            {cameraStarting ? '📷 Camera starting…' : '🎯 Start AI Live Scan'}
           </button>
         </div>
       )}
@@ -471,6 +614,7 @@ export default function AIVideoCapture({ onCapture, calculatorRef, venueId, venu
                   {guardStatus === GUARD_STATUS.VENUE_DETECTED && '🏢'}
                 </div>
                 <span className={styles.guardText}>{guardMsg}</span>
+                <span className={styles.pausedBadge}>⏸ Recording Paused</span>
               </div>
             )}
 
@@ -488,6 +632,12 @@ export default function AIVideoCapture({ onCapture, calculatorRef, venueId, venu
               AI AUTO MODE
             </div>
 
+            {/* REC indicator — top-right alongside privacy badge */}
+            <div className={styles.recBadge}>
+              <span className={styles.recDot} />
+              REC
+            </div>
+
             {/* Location badge */}
             {locationLabel && (
               <div className={styles.locationBadge}>
@@ -499,6 +649,72 @@ export default function AIVideoCapture({ onCapture, calculatorRef, venueId, venu
               <span className={styles.privacyDot} />
               Audio OFF &middot; No recording stored
             </div>
+
+            {/* ── Transition toasts (camera ready, framed OK, recording resumed) ── */}
+            {cameraReadyToast && (
+              <div className={styles.overlayToast + ' ' + styles.overlayToastGreen}>
+                ✅ Camera ready — recording in progress
+              </div>
+            )}
+            {framedOkToast && !cameraReadyToast && (
+              <div className={styles.overlayToast + ' ' + styles.overlayToastGreen}>
+                ✅ Machine framed correctly
+              </div>
+            )}
+            {resumedToast && (
+              <div className={styles.overlayToast + ' ' + styles.overlayToastGreen}>
+                ▶ Recording resumed
+              </div>
+            )}
+
+            {/* ── Live in-session warning prompts ── */}
+            {(() => {
+              const hasActivePrompts =
+                guardStatus === GUARD_STATUS.OK && (
+                  framePrompts.notInView || framePrompts.shake ||
+                  framePrompts.dark || framePrompts.bright || framePrompts.glare
+                )
+              return hasActivePrompts ? (
+                <div className={styles.promptsOverlay}>
+                {framePrompts.notInView && (
+                  <div className={styles.promptWarn}>
+                    📐 Pokie machine not fully in view — please reframe
+                  </div>
+                )}
+                {framePrompts.shake && (
+                  <div className={styles.promptWarn}>
+                    📳 Camera shaking — hold phone steady
+                  </div>
+                )}
+                {framePrompts.dark && (
+                  <div className={styles.promptWarn}>
+                    🔦 Too dark — improve lighting or move closer
+                  </div>
+                )}
+                {framePrompts.bright && (
+                  <div className={styles.promptWarn}>
+                    ☀️ Too bright — adjust angle or reduce light
+                  </div>
+                )}
+                {framePrompts.glare && (
+                  <div className={styles.promptWarn}>
+                    ✨ Glare on screen — adjust camera angle
+                  </div>
+                )}
+              </div>
+            ) : null
+            })()}
+          </div>
+
+          {/* ── Recording status row ── */}
+          <div className={styles.recordingStatusRow}>
+            <span className={styles.recStatus}>
+              <span className={styles.recStatusDot} />
+              Recording in progress
+            </span>
+            <span className={styles.aiStatus}>
+              🤖 AI scanning…
+            </span>
           </div>
 
           {/* Big win toast */}
