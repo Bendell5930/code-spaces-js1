@@ -185,7 +185,7 @@ However, the following **binding safeguards** apply to every participant:
 **Gambling Help Queensland is available 24/7 on 1800 858 858.**
 
 If you are concerned about your gambling at any time — before, during, or after the
-study — please call or visit [gamblinghelp.nsw.gov.au/finding-help/help-lines/](https://www.gamblinghelp.nsw.gov.au).
+study — please call Gambling Help Queensland on **1800 858 858** (free call, 24/7).
 
 ---
 

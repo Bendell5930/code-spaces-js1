@@ -41,6 +41,8 @@ Work through it every session — top to bottom.*
 
 Enter the following fields via the **Data Entry Form** in the app.
 Read the values from the machine screen in front of you — do not guess.
+(Your `participantId` was assigned at enrolment; `sessionId` was generated when you
+tapped Start Session — neither needs to be entered per spin.)
 
 | Field | What to enter |
 |---|---|
