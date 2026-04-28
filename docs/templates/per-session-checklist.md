@@ -111,7 +111,7 @@ checking with the project lead first.
 
 ---
 
-**Project lead contact:** `[email / phone — TO BE COMPLETED]`
+**Project lead contact:** `benjamin@pokieanalyzer.com.au`
 
 ---
 
