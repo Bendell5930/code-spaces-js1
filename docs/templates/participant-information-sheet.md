@@ -6,8 +6,8 @@
 
 # Participant Information Sheet — Pokie Analyzer Consented Self-Logging Study
 
-**Version:** `[TO BE COMPLETED BY PROJECT LEAD]`
-**Date:** `[TO BE COMPLETED BY PROJECT LEAD]`
+**Version:** `1.0.0`
+**Date:** `28/04/2026`
 **Status:** Draft for legal review — not for distribution until lawyer-approved.
 
 Please read this sheet carefully before deciding whether to take part.
@@ -35,8 +35,8 @@ venues they **already visit**. The study does **not** create any new play.
 
 ## 2. Who is running it
 
-- **Project lead:** `[Project lead name — TO BE COMPLETED]`
-- **Contact email:** `[email — TO BE COMPLETED]`
+- **Project lead:** `Benjamin John Ryan`
+- **Contact email:** `benjamin@pokieanalyzer.com.au`
 - **Reviewing Queensland lawyer:** `[Lawyer name and firm — TO BE CONFIRMED BY LAWYER]`
 
 Nothing in this information sheet is legal advice.
@@ -245,8 +245,8 @@ lawyer resumes the protocol.
 ## 16. Contact for questions or complaints
 
 **Project lead:**
-`[Project lead name — TO BE COMPLETED]`
-`[email — TO BE COMPLETED]`
+`Benjamin John Ryan`
+`benjamin@pokieanalyzer.com.au`
 
 **Independent contact for complaints:**
 `[Independent contact name and details — TO BE CONFIRMED BY LAWYER]`

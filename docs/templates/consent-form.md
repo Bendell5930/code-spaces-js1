@@ -7,16 +7,16 @@
 # Consent Form — Pokie Analyzer Consented Self-Logging Study
 
 **Study ID:** `[Study ID — TO BE COMPLETED]`
-**Version:** `[TO BE COMPLETED]`
-**Date:** `[TO BE COMPLETED]`
+**Version:** `1.0.0`
+**Date:** `28/04/2026`
 **Status:** Draft for legal review — final wording subject to lawyer approval.
 
 ---
 
 ## Instructions
 
-Please read the **Participant Information Sheet** (version `[TO BE COMPLETED]`,
-dated `[TO BE COMPLETED]`) before completing this form.
+Please read the **Participant Information Sheet** (version `1.0.0`,
+dated `28/04/2026`) before completing this form.
 
 Place a tick (✓) in the box next to each statement to confirm you agree.
 All boxes must be ticked before you sign this form.
@@ -28,7 +28,7 @@ All boxes must be ticked before you sign this form.
 - [ ] I confirm I am **18 years of age or older**.
 
 - [ ] I have read and understood the Participant Information Sheet (version
-  `[TO BE COMPLETED]`, dated `[TO BE COMPLETED]`).
+  `1.0.0`, dated `28/04/2026`).
 
 - [ ] I have had the opportunity to ask questions about the study, and any questions
   I had have been answered to my satisfaction.
@@ -129,7 +129,7 @@ and I freely and voluntarily agree to take part in the study on the terms descri
 
 To withdraw from the study or request immediate deletion of your data, contact:
 
-**Project lead:** `[project lead email — TO BE COMPLETED]`
+**Project lead:** `benjamin@pokieanalyzer.com.au`
 
 A one-line message is sufficient. Deletion will be carried out immediately.
 
