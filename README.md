@@ -152,6 +152,57 @@ The app runs fully without Stripe credentials — subscription-gated features wi
 
 ---
 
+## Rate limiting (Upstash)
+
+API routes are protected by [Upstash Redis](https://upstash.com/) rate limiting using a sliding-window algorithm (default: 10 requests / 10 seconds per IP).
+
+### Setup
+
+1. Create a Redis database at <https://console.upstash.com>.
+2. Copy the **REST URL** and **REST token** from the database details page.
+3. Add them to your `.env.local` file (**server-side only — do not prefix with `NEXT_PUBLIC_`**):
+
+```
+UPSTASH_REDIS_REST_URL=https://YOUR-UPSTASH-ENDPOINT.upstash.io
+UPSTASH_REDIS_REST_TOKEN=your-upstash-rest-token
+```
+
+4. These same variables must be set in Vercel → Project → Settings → Environment Variables for deployed environments.
+
+### Using the rate limiter in API routes
+
+```js
+import { ratelimit } from "../../lib/ratelimit";
+
+export default async function handler(req, res) {
+  if (ratelimit) {
+    const ip =
+      req.headers["x-forwarded-for"]?.toString().split(",")[0]?.trim() ||
+      req.socket?.remoteAddress ||
+      "anonymous";
+
+    const { success } = await ratelimit.limit(ip);
+    if (!success) return res.status(429).json({ error: "Too many requests" });
+  }
+
+  // ... handler logic
+}
+```
+
+The limiter is imported from `lib/ratelimit.js` and exports `null` when the Upstash env vars are not set, so the app builds and runs gracefully without them.
+
+To change the rate limit, edit `Ratelimit.slidingWindow(10, "10 s")` in `lib/ratelimit.js`.
+
+> **Note:** All Upstash calls happen server-side inside API routes. They are never made from the browser, so **no CSP changes are required** and the tokens must never be exposed to the client.
+
+### Demo endpoint
+
+### Demo endpoint
+
+`GET /api/ping` — returns `{ ok: true, ts: <timestamp> }` with rate-limit headers (`X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`). Returns `429` when the limit is exceeded. Non-GET requests return `405 Method Not Allowed`.
+
+---
+
 ## Contributing
 
 We welcome contributions that align with the project's harm-reduction mission. Please read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
