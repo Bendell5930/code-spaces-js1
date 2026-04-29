@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { loadWinsFeed, cheerWin, postWin } from '../lib/communityStore'
+import { loadWinsFeed, cheerWin, postWin, subscribeWins } from '../lib/communityStore'
 import { playTap, playCoin } from '../lib/sounds'
 import styles from './CommunityHub.module.css'
 
@@ -8,6 +8,8 @@ export default function RecentWinsFeed({ spins }) {
 
   useEffect(() => {
     setFeed(loadWinsFeed())
+    const unsubscribe = subscribeWins((next) => setFeed(next))
+    return unsubscribe
   }, [])
 
   // Auto-post new wins from spins that aren't in the feed yet

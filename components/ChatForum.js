@@ -5,6 +5,7 @@ import {
   loadChat,
   postMessage,
   addReaction,
+  subscribeChat,
   REACTIONS,
 } from '../lib/communityStore'
 import { moderateMessage, reportUser } from '../lib/chatModeration'
@@ -35,6 +36,9 @@ export default function ChatForum() {
   useEffect(() => {
     setProfile(getProfile())
     setMessages(loadChat())
+    // Subscribe to live updates (Realtime hydration + other browsers' messages)
+    const unsubscribe = subscribeChat((msgs) => setMessages(msgs))
+    return unsubscribe
   }, [])
 
   const scrollToBottom = useCallback(() => {
