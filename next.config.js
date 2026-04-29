@@ -9,6 +9,7 @@
 //
 //   • Stripe   — checkout.js, hosted checkout iframe, billing portal
 //   • Vercel   — Vercel Analytics script + beacon endpoint
+//   • Supabase — REST/Auth/Storage over HTTPS + Realtime over WebSockets
 //   • Self     — everything else, no inline scripts
 //
 // `unsafe-inline` is permitted for styles only because Next.js / CSS
@@ -16,10 +17,14 @@
 // from a trusted origin (or be Stripe's signed scripts).
 //
 // `frame-src` allows Stripe Checkout to render in an iframe.
-// `connect-src` allows fetches to Stripe / Vercel from the browser.
+// `connect-src` allows fetches to Stripe / Vercel / Supabase from the
+// browser; `wss://*.supabase.co` is required for Supabase Realtime.
 //
-// Adjust if you add new third-party services (e.g. Supabase would need
-// `https://*.supabase.co` added to connect-src).
+// If you use a custom Supabase domain, add it to `connect-src` and
+// `img-src` below.
+
+const supabaseHttp = 'https://*.supabase.co'
+const supabaseWs = 'wss://*.supabase.co'
 
 const ContentSecurityPolicy = [
   "default-src 'self'",
@@ -31,9 +36,9 @@ const ContentSecurityPolicy = [
   // Track this as a follow-up before any production launch.
   "script-src 'self' 'unsafe-inline' https://js.stripe.com https://va.vercel-scripts.com",
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https:",
+  `img-src 'self' data: blob: https: ${supabaseHttp}`,
   "font-src 'self' data:",
-  "connect-src 'self' https://api.stripe.com https://*.vercel-insights.com https://*.vercel-scripts.com",
+  `connect-src 'self' https://api.stripe.com https://*.vercel-insights.com https://*.vercel-scripts.com ${supabaseHttp} ${supabaseWs}`,
   "frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://checkout.stripe.com https://billing.stripe.com",
   "media-src 'self' blob:",
   "object-src 'none'",

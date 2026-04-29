@@ -197,9 +197,54 @@ To change the rate limit, edit `Ratelimit.slidingWindow(10, "10 s")` in `lib/rat
 
 ### Demo endpoint
 
-### Demo endpoint
-
 `GET /api/ping` — returns `{ ok: true, ts: <timestamp> }` with rate-limit headers (`X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`). Returns `429` when the limit is exceeded. Non-GET requests return `405 Method Not Allowed`.
+
+---
+
+## Supabase
+
+This app ships a ready-to-use Supabase client and a Content Security Policy that already permits `*.supabase.co`. Supabase backs the community chat / wins feed (`lib/communityStore.js`) and server-side subscription state (`lib/subscriptionDb.js`). Both modules degrade gracefully — chat falls back to localStorage-only and `subscriptionDb` falls back to Vercel KV / in-memory — when Supabase env vars are absent.
+
+### Setup
+
+1. **Copy the example env file** and fill in the values from your Supabase dashboard (**Project Settings → API**):
+
+   ```bash
+   cp .env.local.example .env.local
+   ```
+
+   | Variable | Where to find it | Used by |
+   |---|---|---|
+   | `NEXT_PUBLIC_SUPABASE_URL` | Project Settings → API → Project URL | Browser + server |
+   | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Project Settings → API → Project API keys → `anon` `public` | Browser |
+   | `SUPABASE_SERVICE_ROLE_KEY` | Project Settings → API → Project API keys → `service_role` | **Server-only** (never expose to the browser) |
+
+   Never commit `.env.local` — it is already gitignored. The service-role key bypasses Row Level Security and must only ever be set as a server-side env var.
+
+2. **Run the SQL migrations** (in order) to create the tables and Row Level Security policies. Either paste them into Supabase → SQL Editor, or run them with the [Supabase CLI](https://supabase.com/docs/guides/cli):
+
+   ```bash
+   supabase db push
+   ```
+
+   Migrations live in [`supabase/migrations/`](supabase/migrations/):
+   - `0001_community.sql` — community chat / wins / profiles tables and public-anon RLS.
+   - `0002_subscriptions.sql` — Stripe subscription tables, service-role-only RLS.
+
+3. **Import the client** anywhere in the app:
+
+   ```js
+   // Browser-safe (anon key)
+   import { supabase } from "../lib/supabaseClient";
+
+   // Server-only (service-role key, bypasses RLS — use ONLY in /pages/api/*)
+   import { getServiceSupabase } from "../lib/supabaseClient";
+   const admin = getServiceSupabase();
+   ```
+
+   Both helpers return `null` when env vars are missing (safe in CI / environments that don't use Supabase).
+
+4. **Content Security Policy** — `next.config.js` already includes `https://*.supabase.co` in `connect-src` and `img-src`, and `wss://*.supabase.co` in `connect-src` (required for Realtime). If you use a custom Supabase domain, add it to those two directives in `next.config.js`.
 
 ---
 
