@@ -197,7 +197,9 @@ To change the rate limit, edit `Ratelimit.slidingWindow(10, "10 s")` in `lib/rat
 
 ### Demo endpoint
 
-`GET /api/ping` — returns `{ ok: true, ts: <timestamp> }` with rate-limit headers (`X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`). Returns `429` when the limit is exceeded.
+### Demo endpoint
+
+`GET /api/ping` — returns `{ ok: true, ts: <timestamp> }` with rate-limit headers (`X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`). Returns `429` when the limit is exceeded. Non-GET requests return `405 Method Not Allowed`.
 
 ---
 
