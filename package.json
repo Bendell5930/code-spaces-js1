@@ -1,4 +1,8 @@
 {
+  "name": "pokie-analyzer",
+  "version": "1.0.0",
+  "description": "Pokie Analyzer — harm-minimisation companion for Australian pokie players",
+  "license": "MIT",
   "private": true,
   "scripts": {
     "dev": "next",
