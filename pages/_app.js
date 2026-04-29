@@ -3,6 +3,8 @@ import '../global.css'
 import TermsOfService from '../components/TermsOfService'
 import VenuePrivacyMode from '../components/VenuePrivacyMode'
 import LaunchReminder from '../components/LaunchReminder'
+import AgeVerification from '../components/AgeVerification'
+import HelpFooter from '../components/HelpFooter'
 import { Analytics } from '@vercel/analytics/next'
 
 export default function MyApp({ Component, pageProps }) {
@@ -20,13 +22,16 @@ export default function MyApp({ Component, pageProps }) {
 
   return (
     <>
-      <TermsOfService>
-        <VenuePrivacyMode>
-          <LaunchReminder>
-            <Component {...pageProps} />
-          </LaunchReminder>
-        </VenuePrivacyMode>
-      </TermsOfService>
+      <AgeVerification>
+        <TermsOfService>
+          <VenuePrivacyMode>
+            <LaunchReminder>
+              <Component {...pageProps} />
+            </LaunchReminder>
+          </VenuePrivacyMode>
+        </TermsOfService>
+        <HelpFooter />
+      </AgeVerification>
       <Analytics />
     </>
   )
