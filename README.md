@@ -103,6 +103,37 @@ Reload the app. The server will re-check Stripe on every load, so locks reappear
 10. **Manage billing** button (visible when subscribed) → `POST /api/billing-portal` → Stripe Customer Portal for cancellations/upgrades.
 11. **Sign out** clears the local profile (and subscription cache) but does *not* cancel the Stripe subscription — signing back in with the same email re-links the same Stripe customer and unlocks Premium automatically.
 
+## Supabase
+
+This app ships a ready-to-use Supabase client and a Content Security Policy that already permits `*.supabase.co`.
+
+### Setup
+
+1. **Copy the example env file** and fill in the values from your Supabase dashboard (**Project Settings → API**):
+
+   ```bash
+   cp .env.local.example .env.local
+   ```
+
+   | Variable | Where to find it |
+   |---|---|
+   | `NEXT_PUBLIC_SUPABASE_URL` | Project Settings → API → Project URL |
+   | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Project Settings → API → Project API keys → `anon` `public` |
+
+   Never commit `.env.local` — it is already gitignored.
+
+2. **Import the client** anywhere in the app:
+
+   ```js
+   import { supabase } from "../lib/supabaseClient";
+   ```
+
+   The export is `null` when env vars are missing (safe in CI / environments that don't use Supabase).
+
+3. **Content Security Policy** — `next.config.js` already includes `https://*.supabase.co` in `connect-src` and `img-src`, and `wss://*.supabase.co` in `connect-src` (required for Realtime). If you use a custom Supabase domain, add it to those two directives in `next.config.js`.
+
+---
+
 ## Running tests
 
 ```bash
