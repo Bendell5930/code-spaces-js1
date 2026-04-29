@@ -1,0 +1,223 @@
+/* styles/harm-minimisation.module.css — Harm minimisation info page */
+
+.page {
+  min-height: 100vh;
+  background: #1a0a0a;
+  color: #e2e8f0;
+  padding: 2rem 1rem 4rem;
+}
+
+.container {
+  max-width: 740px;
+  margin: 0 auto;
+}
+
+/* ─── Header ─── */
+
+.header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.back {
+  display: inline-block;
+  color: #60a5fa;
+  text-decoration: none;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.back:hover {
+  text-decoration: underline;
+}
+
+.headerIcon {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin: 0 0 0.75rem;
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: #94a3b8;
+  max-width: 580px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+/* ─── Help callout ─── */
+
+.helpCallout {
+  background: #12141f;
+  border: 2px solid #1e3a5f;
+  border-radius: 14px;
+  padding: 1.5rem 1.75rem;
+  margin-bottom: 2.5rem;
+}
+
+.helpCalloutTitle {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #93c5fd;
+  margin: 0 0 1rem;
+}
+
+.helpServiceList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.helpServiceItem {
+  font-size: 0.9rem;
+  color: #cbd5e1;
+}
+
+.helpServiceLink {
+  color: #60a5fa;
+  text-decoration: underline;
+}
+
+.helpServiceLink:hover {
+  color: #93c5fd;
+}
+
+.helpServiceDetail {
+  color: #94a3b8;
+  font-size: 0.85rem;
+}
+
+/* ─── Features ─── */
+
+.featuresTitle {
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin: 0 0 1.25rem;
+  color: #f1f5f9;
+}
+
+.featureGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+}
+
+.featureCard {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  background: #1e1e2e;
+  border: 1px solid #2d3748;
+  border-radius: 12px;
+  padding: 1.1rem 1.25rem;
+}
+
+.featureIcon {
+  font-size: 1.75rem;
+  flex-shrink: 0;
+  line-height: 1;
+  margin-top: 0.1rem;
+}
+
+.featureName {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin: 0 0 0.35rem;
+}
+
+.featureDesc {
+  font-size: 0.88rem;
+  color: #94a3b8;
+  margin: 0 0 0.5rem;
+  line-height: 1.6;
+}
+
+.featureLink {
+  font-size: 0.85rem;
+  color: #60a5fa;
+  text-decoration: underline;
+}
+
+.featureLink:hover {
+  color: #93c5fd;
+}
+
+/* ─── Mission ─── */
+
+.mission {
+  background: #1e1e2e;
+  border-left: 4px solid #3b82f6;
+  border-radius: 0 12px 12px 0;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.missionTitle {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin: 0 0 0.75rem;
+}
+
+.missionText {
+  font-size: 0.9rem;
+  color: #94a3b8;
+  line-height: 1.7;
+  margin: 0 0 0.75rem;
+}
+
+.missionText:last-child {
+  margin-bottom: 0;
+}
+
+/* ─── Footer nav ─── */
+
+.footerNav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.cta {
+  display: inline-block;
+  background: #3b82f6;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.95rem;
+  border-radius: 10px;
+  padding: 0.75rem 1.5rem;
+  text-decoration: none;
+  min-height: 48px;
+  line-height: 1.5;
+  transition: background 0.2s;
+}
+
+.cta:hover {
+  background: #2563eb;
+}
+
+.ctaSecondary {
+  display: inline-block;
+  color: #60a5fa;
+  font-size: 0.95rem;
+  text-decoration: underline;
+  padding: 0.75rem 0;
+  min-height: 48px;
+  line-height: 1.5;
+}
+
+.ctaSecondary:hover {
+  color: #93c5fd;
+}

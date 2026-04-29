@@ -1,0 +1,283 @@
+/* styles/limits.module.css — User limits settings page */
+
+.page {
+  min-height: 100vh;
+  background: #1a0a0a;
+  color: #e2e8f0;
+  padding: 2rem 1rem 4rem;
+}
+
+.container {
+  max-width: 620px;
+  margin: 0 auto;
+}
+
+/* ─── Header ─── */
+
+.header {
+  text-align: center;
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.back {
+  display: inline-block;
+  color: #60a5fa;
+  text-decoration: none;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.back:hover {
+  color: #93c5fd;
+  text-decoration: underline;
+}
+
+.headerIcon {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+  color: #f1f5f9;
+}
+
+.subtitle {
+  font-size: 0.95rem;
+  color: #94a3b8;
+  max-width: 480px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* ─── Sections ─── */
+
+.section {
+  background: #1e1e2e;
+  border: 1px solid #2d3748;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.sectionTitle {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+  color: #f1f5f9;
+}
+
+.sectionDesc {
+  font-size: 0.88rem;
+  color: #94a3b8;
+  margin: 0 0 1.25rem;
+  line-height: 1.6;
+}
+
+/* ─── Form fields ─── */
+
+.fieldGroup {
+  margin-bottom: 1.1rem;
+}
+
+.fieldGroup:last-child {
+  margin-bottom: 0;
+}
+
+.label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #cbd5e1;
+  margin-bottom: 0.35rem;
+}
+
+.inputRow {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.currency {
+  font-size: 1.1rem;
+  color: #94a3b8;
+  user-select: none;
+}
+
+.input {
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  color: #f1f5f9;
+  font-size: 1rem;
+  padding: 0.55rem 0.85rem;
+  width: 100%;
+  max-width: 200px;
+  appearance: none;
+  -moz-appearance: textfield;
+  min-height: 44px; /* accessible tap target */
+}
+
+.input:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+  border-color: #3b82f6;
+}
+
+.input::placeholder {
+  color: #475569;
+}
+
+.fieldHint {
+  display: block;
+  font-size: 0.78rem;
+  color: #64748b;
+  margin-top: 0.3rem;
+}
+
+/* ─── Toggle row ─── */
+
+.toggleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.toggleLabel {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #cbd5e1;
+}
+
+.toggle {
+  position: relative;
+  width: 48px;
+  height: 26px;
+  background: #334155;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.2s;
+  min-height: 26px; /* explicit so tap target is achievable on mobile */
+}
+
+.toggle::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  background: #94a3b8;
+  border-radius: 50%;
+  transition: transform 0.2s, background 0.2s;
+}
+
+.toggleOn {
+  background: #3b82f6;
+}
+
+.toggleOn::after {
+  transform: translateX(22px);
+  background: #fff;
+}
+
+.toggle:focus-visible {
+  outline: 3px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* ─── Save button ─── */
+
+.saveRow {
+  text-align: center;
+  margin: 1.5rem 0;
+}
+
+.saveBtn {
+  background: #3b82f6;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 10px;
+  padding: 0.85rem 2.5rem;
+  cursor: pointer;
+  min-height: 48px;
+  transition: background 0.2s;
+}
+
+.saveBtn:hover {
+  background: #2563eb;
+}
+
+.saveBtn:focus-visible {
+  outline: 3px solid #3b82f6;
+  outline-offset: 3px;
+}
+
+/* ─── Help box ─── */
+
+.helpBox {
+  background: #12141f;
+  border: 1px solid #1e3a5f;
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.helpTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0 0 0.75rem;
+  color: #f1f5f9;
+}
+
+.helpList {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.helpLink {
+  color: #60a5fa;
+  text-decoration: underline;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.helpLink:hover {
+  color: #93c5fd;
+}
+
+a.helpLink {
+  color: #60a5fa;
+}
+
+.helpDesc {
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.helpNote {
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.infoLink {
+  color: #60a5fa;
+  text-decoration: underline;
+}
+
+.infoLink:hover {
+  color: #93c5fd;
+}

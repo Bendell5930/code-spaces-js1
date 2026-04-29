@@ -17,6 +17,7 @@
 
 # misc
 .DS_Store
+Thumbs.db
 *.pem
 
 # debug
@@ -25,7 +26,8 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# local env files
+# local env files (never commit secrets)
+.env
 .env*.local
 
 # vercel

@@ -13,6 +13,7 @@ import VenueInsights from '../components/VenueInsights'
 import ViralHub from '../components/ViralHub'
 import SignUpGate from '../components/SignUpGate'
 import { recordSessionSpin } from '../lib/sessionManager'
+import { pruneSpinLog, safeSetItem } from '../lib/storageQuota'
 import { canAccessTab, FEATURES, PLANS, BASIC_HISTORY_LIMIT } from '../lib/featureGates'
 import { loadSubscription, verifySubscription, applyPremiumUnlock, handleCheckoutReturn, openCustomerPortal } from '../lib/subscriptionStore'
 import { loadProfile, saveProfile, clearProfile } from '../lib/profileStore'
@@ -34,7 +35,18 @@ function loadSpins() {
 }
 
 function saveSpins(spins) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(spins))
+  // Prune to a safe ceiling so the on-device log can't grow without bound
+  // (browsers cap localStorage at ~5 MB; we cap at 5,000 spins / 1 year).
+  const pruned = pruneSpinLog(spins)
+  const payload = JSON.stringify(pruned)
+  // safeSetItem retries once after pruning further if the browser still
+  // throws QuotaExceededError; if even that fails the call returns false
+  // and the in-memory spins state is left intact.
+  safeSetItem(STORAGE_KEY, payload, () => {
+    // Aggressive secondary prune — keep only the most recent 1,000 spins
+    const harder = pruneSpinLog(pruned, { softMax: 1000, maxAgeDays: 90 })
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(harder)) } catch { /* give up */ }
+  })
 }
 
 export default function Home() {
