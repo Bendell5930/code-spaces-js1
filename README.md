@@ -152,6 +152,37 @@ The app runs fully without Stripe credentials — subscription-gated features wi
 
 ---
 
+## Supabase
+
+This app ships a ready-to-use Supabase client and a Content Security Policy that already permits `*.supabase.co`.
+
+### Setup
+
+1. **Copy the example env file** and fill in the values from your Supabase dashboard (**Project Settings → API**):
+
+   ```bash
+   cp .env.local.example .env.local
+   ```
+
+   | Variable | Where to find it |
+   |---|---|
+   | `NEXT_PUBLIC_SUPABASE_URL` | Project Settings → API → Project URL |
+   | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Project Settings → API → Project API keys → `anon` `public` |
+
+   Never commit `.env.local` — it is already gitignored.
+
+2. **Import the client** anywhere in the app:
+
+   ```js
+   import { supabase } from "../lib/supabaseClient";
+   ```
+
+   The export is `null` when env vars are missing (safe in CI / environments that don't use Supabase).
+
+3. **Content Security Policy** — `next.config.js` already includes `https://*.supabase.co` in `connect-src` and `img-src`, and `wss://*.supabase.co` in `connect-src` (required for Realtime). If you use a custom Supabase domain, add it to those two directives in `next.config.js`.
+
+---
+
 ## Contributing
 
 We welcome contributions that align with the project's harm-reduction mission. Please read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
